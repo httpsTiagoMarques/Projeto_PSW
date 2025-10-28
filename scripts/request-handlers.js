@@ -1,5 +1,8 @@
 const conn = require("../config/mysql.pool");
 
+// ============================
+// Gets
+// ============================
 const getUserLogs = (req, res) => {
     const query = `
         SELECT u.id AS userId, u.nome, COUNT(uL.id) AS totalLogs
@@ -29,5 +32,20 @@ const getAllDesportos = (req, res) => {
         res.json(results);
     });
 };
+
+// ============================
+// Posts
+// ============================
+
+
+
+// ============================
+// Puts
+// ============================
+
+
+// ============================
+// Delete
+// ============================
 
 module.exports = { getUserLogs, getAllDesportos };
