@@ -10,7 +10,6 @@ CREATE TABLE User (
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     createdOn DATE NOT NULL,
-    FOREIGN KEY (userRoleId) REFERENCES UserRole (id)
 );
 
 -- Criar tabela UserLog
