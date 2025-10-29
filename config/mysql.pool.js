@@ -8,7 +8,7 @@ const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: 'root',
-    database: 'PSW_Projeto',
+    database: 'psw_projeto',
 });
 
 //Exportar a pool para ser utilizada por outros módulos.
