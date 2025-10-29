@@ -45,4 +45,41 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
     });
     }
 
-module.exports = { registerUser };
+    /////////////////////////////
+    //// Get - User to Login ////
+    /////////////////////////////
+
+    function loginUser(req, res) {
+    const email = (req.body.email || "").trim().toLowerCase();
+    const password = req.body.password || "";
+
+    // validações simples
+    if (!email || !password)
+        return res.status(400).json({ ok: false, message: "Preenche todos os campos." });
+
+    // procurar utilizador pelo email
+    const sql = "SELECT id, password, nome FROM User WHERE email = ?";
+    conn.query(sql, [email], function (err, rows) {
+        if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
+        if (rows.length === 0) return res.status(401).json({ ok: false, message: "Credenciais inválidas." });
+
+        const user = rows[0];
+
+        // comparar password com bcrypt
+        bcrypt.compare(password, user.password, function (err, match) {
+        if (err) return res.status(500).json({ ok: false, message: "Erro ao verificar password." });
+        if (!match) return res.status(401).json({ ok: false, message: "Credenciais inválidas." });
+
+        // guardar login em UserLog
+        const log = "INSERT INTO UserLog (userId, acessoDateTime) VALUES (?, NOW())";
+        conn.query(log, [user.id], function (errLog) {
+            if (errLog) console.error("Erro ao gravar log:", errLog);
+        });
+
+        // sucesso — devolver dados mínimos
+        res.json({ ok: true, message: "Login efetuado com sucesso.", nome: user.nome, userId: user.id });
+        });
+    });
+    }
+
+module.exports = { registerUser,loginUser };

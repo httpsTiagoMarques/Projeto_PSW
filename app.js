@@ -11,10 +11,23 @@ app.use(express.json());
 // servir ficheiros estáticos da pasta www
 app.use(express.static('www'));
 
+app.set("view engine", "ejs");
+app.set("views", "./views");
+
 // ====== REST =======
 // ===== REGISTO =====
 app.post("/api/register", requestHandlers.registerUser);
 
+// ===== LOGIN =====
+app.post("/api/login", requestHandlers.loginUser);
+
+// ===== Dashboard =====
+app.get("/dashboard", function (req, res) {
+  // obtém dados do utilizador enviados via query string ou sessão
+  const nome = req.query.nome || "Utilizador";
+  const userId = req.query.userId || 0;
+  res.render("dashboard", { nome, userId });
+});
 
 // erro genérico
 app.use(function (err, req, res, next) {
