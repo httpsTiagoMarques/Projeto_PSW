@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard</title>
+  <title>Estatísticas</title>
   <link rel="stylesheet" href="/styles/views.css">
 </head>
 <body>
@@ -23,9 +23,23 @@
   <!-- Conteúdo principal -->
   <div class="content">
     <div class="dashboard-box">
-      <h2>Bem-vindo, <%= nome %>!</h2>
-      <p>O teu ID é <%= userId %>.</p>
+      <h2>Rankings de Login</h2>
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Posição</th>
+            <th>ID Utilizador</th>
+            <th>Nome</th>
+            <th>Total de Logins</th>
+          </tr>
+        </thead>
+        <tbody id="stats-body">
+          <!-- linhas serão inseridas via JS -->
+        </tbody>
+      </table>
     </div>
   </div>
+
+  <script src="/scripts/ranking.js"></script>
 </body>
 </html>

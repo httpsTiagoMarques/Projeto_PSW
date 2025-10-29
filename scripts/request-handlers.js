@@ -70,7 +70,7 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
         if (err) return res.status(500).json({ ok: false, message: "Erro ao verificar password." });
         if (!match) return res.status(401).json({ ok: false, message: "Credenciais inválidas." });
 
-        // guardar login em UserLog
+        // Inserir login em UserLog
         const log = "INSERT INTO UserLog (userId, acessoDateTime) VALUES (?, NOW())";
         conn.query(log, [user.id], function (errLog) {
             if (errLog) console.error("Erro ao gravar log:", errLog);
@@ -82,4 +82,39 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
     });
     }
 
-module.exports = { registerUser,loginUser };
+    //////////////////////////////
+    ////// GET - Statistics //////
+    //////////////////////////////
+    function getRankings(req, res) {
+    // SQL: conta o número total de logins (UserLog) por cada utilizador (User)
+    const sql = `
+        SELECT 
+            u.id AS userId,         
+            u.nome AS nome,
+            COUNT(l.id) AS totalLogins
+        FROM User u
+        LEFT JOIN UserLog l ON u.id = l.userId
+        GROUP BY u.id, u.nome             
+        ORDER BY totalLogins DESC
+    `;
+
+    // Executa a query na base de dados
+    conn.query(sql, function (err, rows) {
+        // Se der erro na base de dados, mostra no servidor e envia resposta de erro ao cliente
+        if (err) {
+            console.error("Erro ao obter estatísticas:", err);
+            return res.status(500).json({ ok: false, message: "Erro de base de dados." });
+        }
+
+        // Se tudo correr bem, envia resposta JSON com os resultados
+        res.json({
+            ok: true,                           // indica que correu bem
+            message: "Estatísticas obtidas com sucesso.",
+            data: rows                          // contém a lista de utilizadores e respetivos logins
+        });
+    });
+}
+
+
+
+module.exports = { registerUser,loginUser, getRankings };
