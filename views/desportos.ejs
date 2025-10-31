@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Estatísticas</title>
+  <title>Desportos</title>
   <link rel="stylesheet" href="/styles/views.css">
 </head>
 <body>
@@ -22,22 +22,49 @@
 
   <!-- Conteúdo principal -->
   <div class="content">
-    <div class="dashboard-box">
-      <h2>Desportos</h2>
-      <table class="stats-table">
-        <thead>
-            <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Criado Por</th>
-            <th>Criado Em</th>
-            <th></th>
-            </tr>
-        </thead>
-        <tbody id="desportos-body">
-            <!-- linhas inseridas via JS -->
-        </tbody>
-      </table>
+    <div class="dashboard-box" style="display: flex; gap: 30px; justify-content: center;">
+      
+      <!-- Tabela de desportos -->
+      <div style="flex: 2;">
+        <h2>Desportos</h2>
+        <button id="add-desporto-btn" class="add-button">+ Adicionar Desporto</button>
+        <table class="stats-table">
+          <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Criado Por</th>
+                <th>Criado Em</th>
+                <th></th>
+              </tr>
+          </thead>
+          <tbody id="desportos-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Formulário para criar -->
+      <div class="dashboard-box" id="form-box" style="flex: 1; display: none; text-align: left;">
+        <h3>Novo Desporto</h3>
+        <label for="nome-desporto">Nome:</label>
+        <input type="text" id="nome-desporto" placeholder="Ex: Padel" />
+        <div style="margin-top: 15px;">
+          <button id="create-btn" class="create-btn">Criar</button>
+          <button id="cancel-btn" class="cancel-btn">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- Formulário para editar -->
+      <div class="dashboard-box" id="edit-box" style="flex: 1; display: none; text-align: left;">
+        <h3>Editar Desporto</h3>
+        <input type="hidden" id="edit-id" />
+        <label for="edit-nome">Nome:</label>
+        <input type="text" id="edit-nome" placeholder="Ex: Ténis" />
+        <div style="margin-top: 15px;">
+          <button id="save-edit-btn" class="create-btn">Guardar</button>
+          <button id="cancel-edit-btn" class="cancel-btn">Cancelar</button>
+        </div>
+      </div>
+
     </div>
   </div>
 

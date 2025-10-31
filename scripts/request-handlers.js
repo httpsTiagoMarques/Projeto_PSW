@@ -1,90 +1,72 @@
 const conn = require("../config/mysql.pool"); // ligação à base de dados
 const bcrypt = require("bcrypt"); // para cifrar passwords
 
-    /////////////////////////////
-    ///// POST - RegisterUser ///
-    /////////////////////////////
+    // =======================
+    // REGISTER USER (POST)
+    // =======================
     function registerUser(req, res) {
-    // obter dados do formulário
-    const nome = (req.body.nome || "").trim();
-    const email = (req.body.email || "").trim().toLowerCase();
-    const password = req.body.password || "";
+        const nome = (req.body.nome || "").trim();
+        const email = (req.body.email || "").trim().toLowerCase();
+        const password = req.body.password || "";
 
-    // validações básicas
-    if (!nome || !email || !password)
-        return res.status(400).json({ ok: false, message: "Preenche todos os campos." });
+        // validações básicas
+        if (!nome || !email || !password)
+            return res.status(400).json({ ok: false, message: "Preenche todos os campos." });
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+            return res.status(400).json({ ok: false, message: "Email inválido." });
+        if (password.length < 6)
+            return res.status(400).json({ ok: false, message: "Password demasiado curta." });
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-        return res.status(400).json({ ok: false, message: "Email inválido." });
+        // verifica se email já existe
+        conn.query("SELECT id FROM User WHERE email = ?", [email], (err, rows) => {
+            if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
+            if (rows.length > 0)
+            return res.status(409).json({ ok: false, message: "Email já registado." });
 
-    if (password.length < 6)
-        return res.status(400).json({ ok: false, message: "Password demasiado curta." });
+            // cria password cifrada e insere utilizador
+            bcrypt.hash(password, 10, (err, hash) => {
+            if (err) return res.status(500).json({ ok: false, message: "Erro ao cifrar password." });
 
-    // verificar se o email já existe
-    conn.query("SELECT id FROM User WHERE email = ?", [email], function (err, rows) {
-        if (err) return res.status(500).json({ ok: false, message: "Erro na base de dados." });
-        if (rows.length > 0) return res.status(409).json({ ok: false, message: "Email já registado." });
-
-        // cifrar password
-        bcrypt.hash(password, 10, function (err, hash) {
-        if (err) return res.status(500).json({ ok: false, message: "Erro ao cifrar password." });
-
-        // inserir novo utilizador
-        const sql = "INSERT INTO User (nome, email, password, createdOn) VALUES (?, ?, ?, CURDATE())";
-        conn.query(sql, [nome, email, hash], function (err, result) {
-            if (err) return res.status(500).json({ ok: false, message: "Erro ao registar utilizador." });
-
-            // resposta de sucesso
-            res.status(201).json({
-            ok: true,
-            message: "Utilizador registado com sucesso.",
-            userId: result.insertId
+            const sql = "INSERT INTO User (nome, email, password, createdOn) VALUES (?, ?, ?, CURDATE())";
+            conn.query(sql, [nome, email, hash], (err, result) => {
+                if (err) return res.status(500).json({ ok: false, message: "Erro ao registar utilizador." });
+                res.status(201).json({ ok: true, message: "Utilizador registado com sucesso.", userId: result.insertId });
+            });
             });
         });
-        });
-    });
     }
 
-    /////////////////////////////
-    //// Get - User to Login ////
-    /////////////////////////////
-
+    // ===================
+    // LOGIN USER (POST)
+    // ===================
     function loginUser(req, res) {
-    const email = (req.body.email || "").trim().toLowerCase();
-    const password = req.body.password || "";
+        const email = (req.body.email || "").trim().toLowerCase();
+        const password = req.body.password || "";
 
-    // validações simples
-    if (!email || !password)
-        return res.status(400).json({ ok: false, message: "Preenche todos os campos." });
+        if (!email || !password)
+            return res.status(400).json({ ok: false, message: "Preenche todos os campos." });
 
-    // procurar utilizador pelo email
-    const sql = "SELECT id, password, nome FROM User WHERE email = ?";
-    conn.query(sql, [email], function (err, rows) {
-        if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
-        if (rows.length === 0) return res.status(401).json({ ok: false, message: "Credenciais inválidas." });
+        // procura utilizador
+        conn.query("SELECT id, password, nome FROM User WHERE email = ?", [email], (err, rows) => {
+            if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
+            if (rows.length === 0)
+            return res.status(401).json({ ok: false, message: "Credenciais inválidas." });
 
-        const user = rows[0];
+            const user = rows[0];
+            bcrypt.compare(password, user.password, (err, match) => {
+            if (err || !match)
+                return res.status(401).json({ ok: false, message: "Credenciais inválidas." });
 
-        // comparar password com bcrypt
-        bcrypt.compare(password, user.password, function (err, match) {
-        if (err) return res.status(500).json({ ok: false, message: "Erro ao verificar password." });
-        if (!match) return res.status(401).json({ ok: false, message: "Credenciais inválidas." });
-
-        // Inserir login em UserLog
-        const log = "INSERT INTO UserLog (userId, acessoDateTime) VALUES (?, NOW())";
-        conn.query(log, [user.id], function (errLog) {
-            if (errLog) console.error("Erro ao gravar log:", errLog);
+            // regista login no histórico
+            conn.query("INSERT INTO UserLog (userId, acessoDateTime) VALUES (?, NOW())", [user.id]);
+            res.json({ ok: true, message: "Login efetuado com sucesso.", nome: user.nome, userId: user.id });
+            });
         });
-
-        // sucesso — devolver dados mínimos
-        res.json({ ok: true, message: "Login efetuado com sucesso.", nome: user.nome, userId: user.id });
-        });
-    });
     }
 
-    /////////////////////////////
-    /// GET - Desportos-Table ///
-    /////////////////////////////
+    // ======================
+    // GET DESPORTOS (GET)
+    // ======================
     function getDesportos(req, res) {
         const sql = `
             SELECT 
@@ -97,91 +79,120 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
             ORDER BY d.createdOn DESC
         `;
 
-        conn.query(sql, function (err, rows) {
-            if (err) {
-            console.error("Erro ao obter desportos:", err);
-            return res.status(500).json({ ok: false, message: "Erro ao obter dados da base de dados." });
+        conn.query(sql, (err, rows) => {
+            if (err)
+            return res.status(500).json({ ok: false, message: "Erro ao obter desportos." });
+            res.json({ ok: true, message: "Lista obtida com sucesso.", data: rows });
+        });
+    }
+
+    // =====================================
+    //  ADD DESPORTO (POST) - evita duplicados
+    // =====================================
+    function addDesporto(req, res) {
+        const nome = (req.body.nome || "").trim();
+        const createdBy = req.body.createdBy;
+
+        if (!nome || !createdBy)
+            return res.status(400).json({ ok: false, message: "Nome e utilizador são obrigatórios." });
+
+        // verifica duplicados
+        conn.query("SELECT id FROM Desporto WHERE LOWER(nome) = LOWER(?)", [nome], (err, rows) => {
+            if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
+            if (rows.length > 0)
+            return res.status(409).json({ ok: false, message: "Já existe um desporto com esse nome." });
+
+            // insere novo desporto
+            conn.query(
+            "INSERT INTO Desporto (nome, createdOn, createdBy) VALUES (?, CURDATE(), ?)",
+            [nome, createdBy],
+            (err, result) => {
+                if (err)
+                return res.status(500).json({ ok: false, message: "Erro ao adicionar desporto." });
+                res.status(201).json({ ok: true, message: "Desporto adicionado com sucesso.", desportoId: result.insertId });
             }
+            );
+        });
+    }
 
-            res.json({
-            ok: true,
-            message: "Lista de desportos obtida com sucesso.",
-            data: rows
+    // =====================================
+    //  UPDATE DESPORTO (PUT) - evita duplicados
+    // =====================================
+    function updateDesporto(req, res) {
+        const desportoId = req.params.id;
+        const nome = (req.body.nome || "").trim();
+
+        if (!desportoId || !nome)
+            return res.status(400).json({ ok: false, message: "Dados inválidos." });
+
+        // verifica duplicados
+        conn.query(
+            "SELECT id FROM Desporto WHERE LOWER(nome) = LOWER(?) AND id <> ?",
+            [nome, desportoId],
+            (err, rows) => {
+            if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
+            if (rows.length > 0)
+                return res.status(409).json({ ok: false, message: "Já existe outro desporto com esse nome." });
+
+            // atualiza nome
+            conn.query("UPDATE Desporto SET nome = ? WHERE id = ?", [nome, desportoId], (err, result) => {
+                if (err)
+                return res.status(500).json({ ok: false, message: "Erro ao atualizar desporto." });
+                if (result.affectedRows === 0)
+                return res.status(404).json({ ok: false, message: "Desporto não encontrado." });
+
+                res.json({ ok: true, message: "Desporto atualizado com sucesso." });
             });
-        });
+            }
+        );
     }
 
-    //////////////////////////////
-    /// DELETE - Desporto ///////
-    //////////////////////////////
+    // ========================
+    // DELETE DESPORTO (DEL)
+    // ========================
     function deleteDesporto(req, res) {
-    const desportoId = req.params.id; // obtém o ID da rota
+        const desportoId = req.params.id;
+        if (!desportoId)
+            return res.status(400).json({ ok: false, message: "ID não fornecido." });
 
-    if (!desportoId) {
-        return res.status(400).json({ ok: false, message: "ID do desporto não fornecido." });
-    }
-
-    // Query para apagar o desporto pelo ID
-    const sql = "DELETE FROM Desporto WHERE id = ?";
-
-    conn.query(sql, [desportoId], function (err, result) {
-        if (err) {
-        console.error("Erro ao remover desporto:", err);
-        return res.status(500).json({ ok: false, message: "Erro de base de dados ao remover desporto." });
-        }
-
-        // Se não encontrou linhas para apagar
-        if (result.affectedRows === 0) {
-        return res.status(404).json({ ok: false, message: "Desporto não encontrado." });
-        }
-
-        // Sucesso
-        res.json({ ok: true, message: "Desporto removido com sucesso." });
-    });
-    }
-
-
-
-    //////////////////////////////
-    ////// GET - Statistics //////
-    //////////////////////////////
-    function getRankings(req, res) {
-    // SQL: conta o número total de logins (UserLog) por cada utilizador (User)
-    const sql = `
-        SELECT 
-            u.id AS userId,         
-            u.nome AS nome,
-            COUNT(l.id) AS totalLogins
-        FROM User u
-        LEFT JOIN UserLog l ON u.id = l.userId
-        GROUP BY u.id, u.nome             
-        ORDER BY totalLogins DESC
-    `;
-
-    // Executa a query na base de dados
-    conn.query(sql, function (err, rows) {
-        // Se der erro na base de dados, mostra no servidor e envia resposta de erro ao cliente
-        if (err) {
-            console.error("Erro ao obter estatísticas:", err);
-            return res.status(500).json({ ok: false, message: "Erro de base de dados." });
-        }
-
-        // Se tudo correr bem, envia resposta JSON com os resultados
-        res.json({
-            ok: true,                           // indica que correu bem
-            message: "Estatísticas obtidas com sucesso.",
-            data: rows                          // contém a lista de utilizadores e respetivos logins
+        conn.query("DELETE FROM Desporto WHERE id = ?", [desportoId], (err, result) => {
+            if (err)
+            return res.status(500).json({ ok: false, message: "Erro ao eliminar desporto." });
+            if (result.affectedRows === 0)
+            return res.status(404).json({ ok: false, message: "Desporto não encontrado." });
+            res.json({ ok: true, message: "Desporto removido com sucesso." });
         });
-    });
-}
+    }
 
+    // ==========================
+    // GET RANKINGS (GET)
+    // ==========================
+    function getRankings(req, res) {
+        const sql = `
+            SELECT 
+            u.id AS userId, u.nome AS nome, COUNT(l.id) AS totalLogins
+            FROM User u
+            LEFT JOIN UserLog l ON u.id = l.userId
+            GROUP BY u.id, u.nome
+            ORDER BY totalLogins DESC
+        `;
 
+        conn.query(sql, (err, rows) => {
+            if (err)
+            return res.status(500).json({ ok: false, message: "Erro ao obter estatísticas." });
+            res.json({ ok: true, message: "Estatísticas obtidas com sucesso.", data: rows });
+        });
+    }
 
-module.exports = { 
-  registerUser,
-  loginUser,
-  getDesportos,
-  deleteDesporto,
-  getRankings
-  
-};
+    // ==========================
+    // EXPORTAR FUNÇÕES
+    // ==========================
+    module.exports = {
+    registerUser,
+    loginUser,
+    getDesportos,
+    addDesporto,
+    updateDesporto,
+    deleteDesporto,
+    getRankings
+    };

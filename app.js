@@ -12,16 +12,18 @@ app.use(express.static('www'));
 app.set("view engine", "ejs");
 app.set("views", "./views");
 
-// Rotas de autenticação (registo/login)
-app.use("/api", routers);
 
-// API de estatísticas (para o fetch)
+// API de estatísticas
 app.get("/api/ranking", requestHandlers.getRankings);
 
 // API de desportos
 app.get("/api/getDesportos", requestHandlers.getDesportos);
+app.post("/api/desportos", requestHandlers.addDesporto);
+app.put("/api/desportos/:id", requestHandlers.updateDesporto);
 app.delete("/api/desportos/:id", requestHandlers.deleteDesporto);
 
+// Rotas de autenticação (registo/login)
+app.use("/api", routers);
 
 // Dashboard
 app.get("/dashboard", (req, res) => {
