@@ -18,11 +18,23 @@ app.use("/api", routers);
 // API de estatísticas (para o fetch)
 app.get("/api/ranking", requestHandlers.getRankings);
 
+// API de desportos
+app.get("/api/getDesportos", requestHandlers.getDesportos);
+app.delete("/api/desportos/:id", requestHandlers.deleteDesporto);
+
+
 // Dashboard
 app.get("/dashboard", (req, res) => {
   const nome = req.query.nome || "Utilizador";
   const userId = req.query.userId || 0;
   res.render("dashboard", { nome, userId });
+});
+
+// Pagina de desportos
+app.get("/desportos", (req, res) => {
+  const nome = req.query.nome || "Utilizador";
+  const userId = req.query.userId || 0;
+  res.render("desportos", { nome, userId });
 });
 
 // Página de ranking
@@ -31,6 +43,7 @@ app.get("/ranking", (req, res) => {
   const userId = req.query.userId || 0;
   res.render("ranking", { nome, userId });
 });
+
 
 
 // Erro genérico

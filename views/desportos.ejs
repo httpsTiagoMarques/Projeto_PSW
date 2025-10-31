@@ -12,7 +12,7 @@
     <div class="navbar-center">
       <ul class="navbar-links">
         <li><a href="/dashboard?nome=<%= nome %>&userId=<%= userId %>">Dashboard</a></li>
-         <li><a href="/desportos?nome=<%= nome %>&userId=<%= userId %>">Desportos</a></li>
+        <li><a href="/desportos?nome=<%= nome %>&userId=<%= userId %>">Desportos</a></li>
         <li><a href="#">Estatísticas</a></li>
         <li><a href="/ranking?nome=<%= nome %>&userId=<%= userId %>">Rankings</a></li>
         <li><a href="/index.html" class="logout-button" onclick="sessionStorage.clear()">Log out</a></li>
@@ -23,23 +23,24 @@
   <!-- Conteúdo principal -->
   <div class="content">
     <div class="dashboard-box">
-      <h2>Rankings de Login</h2>
+      <h2>Desportos</h2>
       <table class="stats-table">
         <thead>
-          <tr>
-            <th>Posição</th>
-            <th>ID Utilizador</th>
+            <tr>
+            <th>ID</th>
             <th>Nome</th>
-            <th>Total de Logins</th>
-          </tr>
+            <th>Criado Por</th>
+            <th>Criado Em</th>
+            <th></th>
+            </tr>
         </thead>
-        <tbody id="stats-body">
-          <!-- linhas serão inseridas via JS -->
+        <tbody id="desportos-body">
+            <!-- linhas inseridas via JS -->
         </tbody>
       </table>
     </div>
   </div>
 
-  <script src="/scripts/ranking.js"></script>
+  <script src="/scripts/desportos.js"></script>
 </body>
 </html>

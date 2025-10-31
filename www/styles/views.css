@@ -136,3 +136,36 @@ body {
 .stats-table tr:hover {
   background-color: #eef3ff;
 }
+
+
+/* ===== BOTÕES DE AÇÃO ===== */
+.actions {
+  text-align: center;
+}
+
+.edit-btn, .delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  margin: 0 4px;
+}
+
+.edit-btn {
+  background-color: #4b6cb7;
+  color: white;
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #3b589e;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}

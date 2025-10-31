@@ -82,6 +82,66 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
     });
     }
 
+    /////////////////////////////
+    /// GET - Desportos-Table ///
+    /////////////////////////////
+    function getDesportos(req, res) {
+        const sql = `
+            SELECT 
+            d.id AS desportoId,
+            d.nome AS nome,
+            d.createdOn AS criadoEm,
+            u.nome AS criadoPor
+            FROM Desporto d
+            INNER JOIN User u ON d.createdBy = u.id
+            ORDER BY d.createdOn DESC
+        `;
+
+        conn.query(sql, function (err, rows) {
+            if (err) {
+            console.error("Erro ao obter desportos:", err);
+            return res.status(500).json({ ok: false, message: "Erro ao obter dados da base de dados." });
+            }
+
+            res.json({
+            ok: true,
+            message: "Lista de desportos obtida com sucesso.",
+            data: rows
+            });
+        });
+    }
+
+    //////////////////////////////
+    /// DELETE - Desporto ///////
+    //////////////////////////////
+    function deleteDesporto(req, res) {
+    const desportoId = req.params.id; // obtém o ID da rota
+
+    if (!desportoId) {
+        return res.status(400).json({ ok: false, message: "ID do desporto não fornecido." });
+    }
+
+    // Query para apagar o desporto pelo ID
+    const sql = "DELETE FROM Desporto WHERE id = ?";
+
+    conn.query(sql, [desportoId], function (err, result) {
+        if (err) {
+        console.error("Erro ao remover desporto:", err);
+        return res.status(500).json({ ok: false, message: "Erro de base de dados ao remover desporto." });
+        }
+
+        // Se não encontrou linhas para apagar
+        if (result.affectedRows === 0) {
+        return res.status(404).json({ ok: false, message: "Desporto não encontrado." });
+        }
+
+        // Sucesso
+        res.json({ ok: true, message: "Desporto removido com sucesso." });
+    });
+    }
+
+
+
     //////////////////////////////
     ////// GET - Statistics //////
     //////////////////////////////
@@ -117,4 +177,11 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
 
 
 
-module.exports = { registerUser,loginUser, getRankings };
+module.exports = { 
+  registerUser,
+  loginUser,
+  getDesportos,
+  deleteDesporto,
+  getRankings
+  
+};
