@@ -8,17 +8,7 @@
 </head>
 <body>
   <!-- Barra de navegação -->
-  <nav class="navbar">
-    <div class="navbar-center">
-      <ul class="navbar-links">
-        <li><a href="/dashboard?nome=<%= nome %>&userId=<%= userId %>">Dashboard</a></li>
-         <li><a href="/desportos?nome=<%= nome %>&userId=<%= userId %>">Desportos</a></li>
-        <li><a href="#">Estatísticas</a></li>
-        <li><a href="/ranking?nome=<%= nome %>&userId=<%= userId %>">Rankings</a></li>
-        <li><a href="/index.html" class="logout-button" onclick="sessionStorage.clear()">Log out</a></li>
-      </ul>
-    </div>      
-  </nav>
+  <%- include("navbar") %>
 
   <!-- Conteúdo principal -->
   <div class="content">
@@ -41,5 +31,6 @@
   </div>
 
   <script src="/scripts/ranking.js"></script>
+  <script src="/scripts/logout.js"></script>
 </body>
 </html>

@@ -1,0 +1,22 @@
+<!-- views/navbar.ejs -->
+<nav class="navbar">
+  <div class="navbar-center">
+    <ul class="navbar-links">
+      <li>
+        <a href="/dashboard?nome=<%= encodeURIComponent(nome) %>&userId=<%= userId %>">Dashboard</a>
+      </li>
+      <li>
+        <a href="/desportos?nome=<%= encodeURIComponent(nome) %>&userId=<%= userId %>">Desportos</a>
+      </li>
+      <li>
+        <a href="#">Estatísticas</a>
+      </li>
+      <li>
+        <a href="/ranking?nome=<%= encodeURIComponent(nome) %>&userId=<%= userId %>">Rankings</a>
+      </li>
+      <li>
+        <a href="#" id="logout-btn" class="logout-button">Log out</a>
+      </li>
+    </ul>
+  </div>
+</nav>

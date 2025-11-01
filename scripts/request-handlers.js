@@ -76,7 +76,7 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
             u.nome AS criadoPor
             FROM Desporto d
             INNER JOIN User u ON d.createdBy = u.id
-            ORDER BY d.createdOn DESC
+            ORDER BY d.id ASC
         `;
 
         conn.query(sql, (err, rows) => {
@@ -90,30 +90,31 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
     //  ADD DESPORTO (POST) - evita duplicados
     // =====================================
     function addDesporto(req, res) {
-        const nome = (req.body.nome || "").trim();
-        const createdBy = req.body.createdBy;
+  const nome = (req.body.nome || "").trim();
+  const createdBy = req.session?.user?.id; // ✅ obtém o ID da sessão do utilizador
 
-        if (!nome || !createdBy)
-            return res.status(400).json({ ok: false, message: "Nome e utilizador são obrigatórios." });
+  if (!nome || !createdBy)
+    return res.status(400).json({ ok: false, message: "Nome e utilizador são obrigatórios." });
 
-        // verifica duplicados
-        conn.query("SELECT id FROM Desporto WHERE LOWER(nome) = LOWER(?)", [nome], (err, rows) => {
-            if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
-            if (rows.length > 0)
-            return res.status(409).json({ ok: false, message: "Já existe um desporto com esse nome." });
+  // verifica duplicados
+  conn.query("SELECT id FROM Desporto WHERE LOWER(nome) = LOWER(?)", [nome], (err, rows) => {
+    if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
+    if (rows.length > 0)
+      return res.status(409).json({ ok: false, message: "Já existe um desporto com esse nome." });
 
-            // insere novo desporto
-            conn.query(
-            "INSERT INTO Desporto (nome, createdOn, createdBy) VALUES (?, CURDATE(), ?)",
-            [nome, createdBy],
-            (err, result) => {
-                if (err)
-                return res.status(500).json({ ok: false, message: "Erro ao adicionar desporto." });
-                res.status(201).json({ ok: true, message: "Desporto adicionado com sucesso.", desportoId: result.insertId });
-            }
-            );
-        });
-    }
+    // insere novo desporto
+    conn.query(
+      "INSERT INTO Desporto (nome, createdOn, createdBy) VALUES (?, CURDATE(), ?)",
+      [nome, createdBy],
+      (err, result) => {
+        if (err)
+          return res.status(500).json({ ok: false, message: "Erro ao adicionar desporto." });
+        res.status(201).json({ ok: true, message: "Desporto adicionado com sucesso.", desportoId: result.insertId });
+      }
+    );
+  });
+}
+
 
     // =====================================
     //  UPDATE DESPORTO (PUT) - evita duplicados
