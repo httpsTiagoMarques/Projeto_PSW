@@ -25,7 +25,7 @@ document.getElementById("regForm").addEventListener("submit", function (ev) {
   body.append("password", password);
 
   // enviar pedido POST para o servidor
-  fetch("/api/register", {
+  fetch("/authentication/signup", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: body.toString()
@@ -34,10 +34,11 @@ document.getElementById("regForm").addEventListener("submit", function (ev) {
     .then(function (res) { return res.json(); })
     // tratar resposta
     .then(function (data) {
-      if (data && data.ok) {
+      if (data && data.message && data.message.includes("sucesso")) {
         msg.classList.add("ok");
-        msg.textContent = "Registo concluído! A redirecionar...";
-        // redirecionar após 1.2s
+        msg.textContent = data.message || "Registo concluído!";
+
+        // Redirecionar automaticamente após 1,2 segundos
         setTimeout(function () {
           window.location.href = "./index.html";
         }, 1200);

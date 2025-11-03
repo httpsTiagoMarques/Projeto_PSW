@@ -1,69 +1,6 @@
 const conn = require("../config/mysql.pool"); // ligação à base de dados
 const bcrypt = require("bcrypt"); // para cifrar passwords
 
-    // =======================
-    // REGISTER USER (POST)
-    // =======================
-    function registerUser(req, res) {
-        const nome = (req.body.nome || "").trim();
-        const email = (req.body.email || "").trim().toLowerCase();
-        const password = req.body.password || "";
-
-        // validações básicas
-        if (!nome || !email || !password)
-            return res.status(400).json({ ok: false, message: "Preenche todos os campos." });
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-            return res.status(400).json({ ok: false, message: "Email inválido." });
-        if (password.length < 6)
-            return res.status(400).json({ ok: false, message: "Password demasiado curta." });
-
-        // verifica se email já existe
-        conn.query("SELECT id FROM User WHERE email = ?", [email], (err, rows) => {
-            if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
-            if (rows.length > 0)
-            return res.status(409).json({ ok: false, message: "Email já registado." });
-
-            // cria password cifrada e insere utilizador
-            bcrypt.hash(password, 10, (err, hash) => {
-            if (err) return res.status(500).json({ ok: false, message: "Erro ao cifrar password." });
-
-            const sql = "INSERT INTO User (nome, email, password, createdOn) VALUES (?, ?, ?, CURDATE())";
-            conn.query(sql, [nome, email, hash], (err, result) => {
-                if (err) return res.status(500).json({ ok: false, message: "Erro ao registar utilizador." });
-                res.status(201).json({ ok: true, message: "Utilizador registado com sucesso.", userId: result.insertId });
-            });
-            });
-        });
-    }
-
-    // ===================
-    // LOGIN USER (POST)
-    // ===================
-    function loginUser(req, res) {
-        const email = (req.body.email || "").trim().toLowerCase();
-        const password = req.body.password || "";
-
-        if (!email || !password)
-            return res.status(400).json({ ok: false, message: "Preenche todos os campos." });
-
-        // procura utilizador
-        conn.query("SELECT id, password, nome FROM User WHERE email = ?", [email], (err, rows) => {
-            if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
-            if (rows.length === 0)
-            return res.status(401).json({ ok: false, message: "Credenciais inválidas." });
-
-            const user = rows[0];
-            bcrypt.compare(password, user.password, (err, match) => {
-            if (err || !match)
-                return res.status(401).json({ ok: false, message: "Credenciais inválidas." });
-
-            // regista login no histórico
-            conn.query("INSERT INTO UserLog (userId, acessoDateTime) VALUES (?, NOW())", [user.id]);
-            res.json({ ok: true, message: "Login efetuado com sucesso.", nome: user.nome, userId: user.id });
-            });
-        });
-    }
-
     // ======================
     // GET DESPORTOS (GET)
     // ======================
@@ -91,7 +28,7 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
     // =====================================
     function addDesporto(req, res) {
   const nome = (req.body.nome || "").trim();
-  const createdBy = req.session?.user?.id; // ✅ obtém o ID da sessão do utilizador
+  const createdBy = req.user?.id;
 
   if (!nome || !createdBy)
     return res.status(400).json({ ok: false, message: "Nome e utilizador são obrigatórios." });
@@ -189,8 +126,6 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
     // EXPORTAR FUNÇÕES
     // ==========================
     module.exports = {
-    registerUser,
-    loginUser,
     getDesportos,
     addDesporto,
     updateDesporto,

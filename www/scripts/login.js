@@ -39,8 +39,8 @@ document.getElementById("loginForm").addEventListener("submit", function (ev) {
   body.append("email", email.value.trim());
   body.append("password", password.value);
 
-  // Envia pedido POST para login
-  fetch("/api/login", {
+  // Envia pedido POST para login (rota correta com Passport)
+  fetch("/authentication/login", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     credentials: "include", // Inclui cookies da sessão
@@ -48,7 +48,7 @@ document.getElementById("loginForm").addEventListener("submit", function (ev) {
   })
     .then(res => res.json()) // Converte resposta em JSON
     .then(data => {
-      if (data.ok) {
+      if (data.user) {
         msg.classList.add("ok");
         msg.textContent = "Login com sucesso! A redirecionar...";
 
