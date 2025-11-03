@@ -122,13 +122,77 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
         });
     }
 
+
+    // ================================
+    // GET SESSÕES (LISTAR) - do utilizador logado
+    // ================================
+    function getSessoes(req, res) {
+        const userId = req.user?.id;
+        if (!userId)
+            return res.status(401).json({ ok: false, message: "Utilizador não autenticado." });
+
+        const sql = `
+            SELECT 
+                s.id AS sessaoId,
+                d.nome AS desporto,
+                s.duracao,
+                s.localizacao,
+                s.data,
+                s.hora
+            FROM Sessao s
+            INNER JOIN Desporto d ON s.desportoId = d.id
+            WHERE s.userId = ?
+            ORDER BY s.data DESC, s.hora DESC
+        `;
+
+        conn.query(sql, [userId], (err, rows) => {
+            if (err)
+                return res.status(500).json({ ok: false, message: "Erro ao obter sessões." });
+            res.json({ ok: true, message: "Lista de sessões obtida com sucesso.", data: rows });
+        });
+    }
+
+    // ======================================
+    // ADD SESSÃO (POST) - registar novo treino
+    // ======================================
+    function addSessao(req, res) {
+        const userId = req.user?.id;
+        const { desportoId, duracao, localizacao, data, hora } = req.body;
+
+        if (!userId)
+            return res.status(401).json({ ok: false, message: "Utilizador não autenticado." });
+
+        if (!desportoId || !duracao || !localizacao || !data || !hora)
+            return res.status(400).json({ ok: false, message: "Todos os campos são obrigatórios." });
+
+        const sql = `
+            INSERT INTO Sessao (userId, desportoId, duracao, localizacao, data, hora)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `;
+
+        conn.query(sql, [userId, desportoId, duracao, localizacao, data, hora], (err, result) => {
+            if (err)
+                return res.status(500).json({ ok: false, message: "Erro ao registar a sessão." });
+
+            res.status(201).json({
+                ok: true,
+                message: "Sessão registada com sucesso.",
+                sessaoId: result.insertId
+            });
+        });
+    }
+
+
+
     // ==========================
     // EXPORTAR FUNÇÕES
     // ==========================
     module.exports = {
-    getDesportos,
-    addDesporto,
-    updateDesporto,
-    deleteDesporto,
-    getRankings
+        getDesportos,
+        addDesporto,
+        updateDesporto,
+        deleteDesporto,
+        getRankings,
+        getSessoes,
+        addSessao
     };

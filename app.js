@@ -55,6 +55,10 @@ app.post("/api/desportos", ensureAuthenticated, requestHandlers.addDesporto);
 app.put("/api/desportos/:id", ensureAuthenticated, requestHandlers.updateDesporto);
 app.delete("/api/desportos/:id", ensureAuthenticated, requestHandlers.deleteDesporto);
 app.get("/api/ranking", ensureAuthenticated, requestHandlers.getRankings);
+// --- SESSOES ---
+app.get("/api/sessoes", ensureAuthenticated, requestHandlers.getSessoes);
+app.post("/api/sessoes", ensureAuthenticated, requestHandlers.addSessao);
+
 
 // Páginas EJS protegidas
 app.get("/dashboard", ensureAuthenticated, (req, res) => {
@@ -74,5 +78,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(8081, () => {
-  console.log("✅ Server running at http://localhost:8081");
+  console.log(" Server running at http://localhost:8081");
 });

@@ -1,22 +1,69 @@
 <!DOCTYPE html>
 <html lang="pt">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="/styles/views.css">
-</head>
-<body>
-  <!-- Barra de navegação -->
-  <%- include("navbar") %>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/styles/views.css" />
+  </head>
+  <body>
+    <!-- Barra de navegação -->
+    <%- include("navbar") %>
 
-  <!-- Conteúdo principal -->
-  <div class="content">
-    <div class="dashboard-box">
-      <h2>Bem-vindo, <%= nome %>!</h2>
-      <p>O teu ID é <%= userId %>.</p>
+    <!-- Conteúdo principal -->
+    <div class="content">
+      <div class="dashboard-box">
+        <h2>Bem-vindo, <%= nome %>!</h2>
+        <p>O teu ID é <%= userId %>.</p>
+        <h2>As tuas Sessões de Treino</h2>
+
+        
+
+        <div id="form-box" style="display: none; margin-top: 10px">
+          <h3>Novo treino</h3>
+
+          <label>Desporto:</label><br />
+          <select id="desporto-select" required></select
+          ><br /><br />
+
+          <label>Duração (min):</label><br />
+          <input type="number" id="duracao" min="1" required /><br /><br />
+
+          <label>Localização:</label><br />
+          <input type="text" id="localizacao" required /><br /><br />
+
+          <label>Data:</label><br />
+          <input type="date" id="data" required /><br /><br />
+
+          <label>Hora:</label><br />
+          <input type="time" id="hora" required /><br /><br />
+
+          <button id="create-btn">Guardar</button>
+          <button id="cancel-btn">Cancelar</button>
+        </div>
+
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Desporto</th>
+              <th>Duração</th>
+              <th>Localização</th>
+              <th>Data</th>
+              <th>Hora</th>
+            </tr>
+          </thead>
+          <tbody id="sessoes-body">
+            <tr>
+              <td colspan="6" style="text-align: center">A carregar...</td>
+            </tr>
+          </tbody>
+          <button id="add-sessao-btn" class="add-button">Novo Treino</button>
+        </table>
+
+        <script src="/scripts/dashboard.js"></script>
+      </div>
     </div>
-  </div>
-  <script src="/scripts/logout.js"></script>
-</body>
+    <script src="/scripts/logout.js"></script>
+  </body>
 </html>

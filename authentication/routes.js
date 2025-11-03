@@ -15,7 +15,7 @@ router.post("/login", function (req, res, next) {
     req.login(user, function (err) {
       if (err) return next(err);
 
-      // ✅ Regista login no histórico (UserLog)
+      //  Regista login no histórico (UserLog)
       mysqlPool.query(
         "INSERT INTO UserLog (userId, acessoDateTime) VALUES (?, NOW())",
         [user.id],
