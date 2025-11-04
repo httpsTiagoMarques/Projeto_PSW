@@ -5,12 +5,12 @@ window.addEventListener("DOMContentLoaded", function () {
   var addButton = document.getElementById("add-desporto-btn");
   var formBox = document.getElementById("form-box");
   var editBox = document.getElementById("edit-box");
-  var createBtn = document.getElementById("create-btn");
-  var cancelBtn = document.getElementById("cancel-btn");
+  var createForm = document.getElementById("create-form");
+  var editForm = document.getElementById("edit-form");
   var nomeInput = document.getElementById("nome-desporto");
   var editNome = document.getElementById("edit-nome");
   var editId = document.getElementById("edit-id");
-  var saveEditBtn = document.getElementById("save-edit-btn");
+  var cancelBtn = document.getElementById("cancel-btn");
   var cancelEditBtn = document.getElementById("cancel-edit-btn");
 
   // ==========================
@@ -18,14 +18,13 @@ window.addEventListener("DOMContentLoaded", function () {
   // ==========================
   function carregarDesportos() {
     fetch("/api/getDesportos")
-      .then((res) => res.json())
-      .then((data) => {
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
         tableBody.innerHTML = "";
 
         if (data.ok && data.data.length > 0) {
           data.data.forEach(function (item) {
             var row = document.createElement("tr");
-
             row.innerHTML = `
               <td>${item.desportoId}</td>
               <td>${item.nome}</td>
@@ -36,43 +35,31 @@ window.addEventListener("DOMContentLoaded", function () {
                 <button class="delete-btn" data-id="${item.desportoId}">Remover</button>
               </td>
             `;
-
             tableBody.appendChild(row);
           });
 
-          // Botão de editar
+          // Botão editar
           document.querySelectorAll(".edit-btn").forEach(function (btn) {
             btn.addEventListener("click", function () {
-              const id = this.getAttribute("data-id");
-              const nome = this.getAttribute("data-nome");
-
-              // Preenche o formulário de edição
-              editId.value = id;
-              editNome.value = nome;
-
-              // Mostra o formulário de edição e esconde o de criação
+              editId.value = this.getAttribute("data-id");
+              editNome.value = this.getAttribute("data-nome");
               formBox.style.display = "none";
               editBox.style.display = "block";
             });
           });
 
-          // Botão de remover
+          // Botão remover
           document.querySelectorAll(".delete-btn").forEach(function (btn) {
             btn.addEventListener("click", function () {
-              const id = this.getAttribute("data-id");
-              const confirmDelete = confirm("Tens a certeza que queres remover este desporto?");
-
-              if (confirmDelete) {
-                fetch(`/api/desportos/${id}`, { method: "DELETE" })
-                  .then((res) => res.json())
-                  .then((response) => {
-                    if (response.ok) {
-                      carregarDesportos();
-                    } else {
-                      alert("Erro: " + response.message);
-                    }
+              var id = this.getAttribute("data-id");
+              if (confirm("Tens a certeza que queres remover este desporto?")) {
+                fetch("/api/desportos/" + id, { method: "DELETE" })
+                  .then(function (res) { return res.json(); })
+                  .then(function (response) {
+                    if (response.ok) carregarDesportos();
+                    else alert("Erro: " + response.message);
                   })
-                  .catch((err) => {
+                  .catch(function (err) {
                     console.error("Erro ao remover desporto:", err);
                     alert("Erro de comunicação com o servidor.");
                   });
@@ -97,18 +84,18 @@ window.addEventListener("DOMContentLoaded", function () {
     editBox.style.display = "none";
   });
 
-  // Cancelar criar
   cancelBtn.addEventListener("click", function () {
     formBox.style.display = "none";
     nomeInput.value = "";
   });
 
   // ==========================
-  // Criar novo desporto
+  // Submeter formulário de criação
   // ==========================
-  createBtn.addEventListener("click", function () {
-    const nome = nomeInput.value.trim();
+  createForm.addEventListener("submit", function (e) {
+    e.preventDefault();
 
+    var nome = nomeInput.value.trim();
     if (!nome) {
       alert("Preenche o nome do desporto.");
       return;
@@ -117,10 +104,10 @@ window.addEventListener("DOMContentLoaded", function () {
     fetch("/api/desportos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome }), // ✅ só envia o nome
+      body: JSON.stringify({ nome: nome }),
     })
-      .then((res) => res.json())
-      .then((response) => {
+      .then(function (res) { return res.json(); })
+      .then(function (response) {
         if (response.ok) {
           formBox.style.display = "none";
           nomeInput.value = "";
@@ -129,31 +116,32 @@ window.addEventListener("DOMContentLoaded", function () {
           alert("Erro: " + response.message);
         }
       })
-      .catch((err) => {
+      .catch(function (err) {
         console.error("Erro ao adicionar desporto:", err);
         alert("Erro de comunicação com o servidor.");
       });
   });
 
   // ==========================
-  // Guardar edição
+  // Submeter formulário de edição
   // ==========================
-  saveEditBtn.addEventListener("click", function () {
-    const id = editId.value;
-    const nome = editNome.value.trim();
+  editForm.addEventListener("submit", function (e) {
+    e.preventDefault();
 
+    var id = editId.value;
+    var nome = editNome.value.trim();
     if (!nome) {
       alert("Preenche o nome do desporto.");
       return;
     }
 
-    fetch(`/api/desportos/${id}`, {
+    fetch("/api/desportos/" + id, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome }),
+      body: JSON.stringify({ nome: nome }),
     })
-      .then((res) => res.json())
-      .then((response) => {
+      .then(function (res) { return res.json(); })
+      .then(function (response) {
         if (response.ok) {
           editBox.style.display = "none";
           carregarDesportos();
@@ -161,15 +149,12 @@ window.addEventListener("DOMContentLoaded", function () {
           alert("Erro: " + response.message);
         }
       })
-      .catch((err) => {
+      .catch(function (err) {
         console.error("Erro ao atualizar desporto:", err);
         alert("Erro de comunicação com o servidor: " + err.message);
       });
   });
 
-  // ==========================
-  // Cancelar edição
-  // ==========================
   cancelEditBtn.addEventListener("click", function () {
     editBox.style.display = "none";
     editNome.value = "";

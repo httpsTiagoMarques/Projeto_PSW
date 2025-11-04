@@ -35,24 +35,28 @@
       <!-- Formulário para criar -->
       <div class="dashboard-box" id="form-box" style="flex: 1; display: none; text-align: left;">
         <h3>Novo Desporto</h3>
-        <label for="nome-desporto">Nome:</label>
-        <input type="text" id="nome-desporto" placeholder="Ex: Padel" />
-        <div style="margin-top: 15px;">
-          <button id="create-btn" class="create-btn">Criar</button>
-          <button id="cancel-btn" class="cancel-btn">Cancelar</button>
-        </div>
+        <form id="create-form">
+          <label for="nome-desporto">Nome:</label>
+          <input type="text" id="nome-desporto" name="nome" placeholder="Ex: Padel" required />
+          <div style="margin-top: 15px;">
+            <button type="submit" class="create-btn">Criar</button>
+            <button type="button" id="cancel-btn" class="cancel-btn">Cancelar</button>
+          </div>
+        </form>
       </div>
 
       <!-- Formulário para editar -->
       <div class="dashboard-box" id="edit-box" style="flex: 1; display: none; text-align: left;">
         <h3>Editar Desporto</h3>
-        <input type="hidden" id="edit-id" />
-        <label for="edit-nome">Nome:</label>
-        <input type="text" id="edit-nome" placeholder="Ex: Ténis" />
-        <div style="margin-top: 15px;">
-          <button id="save-edit-btn" class="create-btn">Guardar</button>
-          <button id="cancel-edit-btn" class="cancel-btn">Cancelar</button>
-        </div>
+        <form id="edit-form">
+          <input type="hidden" id="edit-id" name="id" />
+          <label for="edit-nome">Nome:</label>
+          <input type="text" id="edit-nome" name="nome" placeholder="Ex: Ténis" required />
+          <div style="margin-top: 15px;">
+            <button type="submit" class="create-btn">Guardar</button>
+            <button type="button" id="cancel-edit-btn" class="cancel-btn">Cancelar</button>
+          </div>
+        </form>
       </div>
 
     </div>
@@ -60,6 +64,5 @@
 
   <script src="/scripts/desportos.js"></script>
   <script src="/scripts/logout.js"></script>
-
 </body>
 </html>
