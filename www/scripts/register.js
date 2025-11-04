@@ -1,4 +1,3 @@
-// sem async/await (requisito do projeto)
 document.getElementById("regForm").addEventListener("submit", function (ev) {
   ev.preventDefault(); // impede o envio normal do formulário
 
