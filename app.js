@@ -62,6 +62,9 @@ app.post("/api/sessoes", ensureAuthenticated, requestHandlers.addSessao);
 app.put("/api/sessoes/:id", ensureAuthenticated, requestHandlers.updateSessao);
 app.delete("/api/sessoes/:id", ensureAuthenticated, requestHandlers.deleteSessao);
 
+// --- Estatisticas ---
+app.get("/api/estatisticas", ensureAuthenticated, requestHandlers.getEstatisticas);
+app.get("/api/estatisticasPorDesporto", ensureAuthenticated, requestHandlers.getEstatisticasPorDesporto);
 
 
 // Páginas EJS protegidas
@@ -73,6 +76,10 @@ app.get("/desportos", ensureAuthenticated, (req, res) => {
 });
 app.get("/ranking", ensureAuthenticated, (req, res) => {
   res.render("ranking", { nome: req.user.nome, userId: req.user.id });
+});
+
+app.get("/estatisticas", ensureAuthenticated, (req, res) => {
+  res.render("estatisticas", { nome: req.user.nome, userId: req.user.id });
 });
 
 // Erros

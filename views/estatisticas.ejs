@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Estatísticas</title>
+  <link rel="stylesheet" href="/styles/views.css">
+</head>
+<body>
+  <%- include("navbar") %>
+
+  <div class="content">
+    <div class="dashboard-box">
+      <h2>Estatísticas</h2>
+
+      <div class="stats-container">
+        <div class="stat-card">
+          <h3 id="total-sessoes">0</h3>
+          <p>Número total de sessões</p>
+        </div>
+
+        <div class="stat-card">
+          <h3 id="tempo-total">0 min</h3>
+          <p>Tempo total de sessões</p>
+        </div>
+
+        <div class="stat-card">
+          <h3 id="desporto-fav">—</h3>
+          <p>Desporto favorito</p>
+        </div>
+      </div>
+
+      <!-- Tabela Estatísticas por Desporto -->
+    <h4>Sessões e duração por desporto</h4>
+    <p></p>
+    <table class="stats-table" id="tabela-estatisticas">
+    <thead>
+        <tr>
+        <th>Desporto</th>
+        <th>Total de Sessões</th>
+        <th>Tempo Total</th>
+        </tr>
+    </thead>
+    <tbody id="estatisticas-body"></tbody>
+    </table>
+
+    </div>
+  </div>
+
+  <script src="/scripts/estatisticas.js"></script>
+  <script src="/scripts/logout.js"></script>
+</body>
+</html>
