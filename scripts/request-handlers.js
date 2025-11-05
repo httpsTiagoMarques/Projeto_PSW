@@ -1,11 +1,11 @@
 const conn = require("../config/mysql.pool"); // ligação à base de dados
 const bcrypt = require("bcrypt"); // para cifrar passwords
 
-    // ======================
-    // GET DESPORTOS (GET)
-    // ======================
-    function getDesportos(req, res) {
-        const sql = `
+// ======================
+// GET DESPORTOS (GET)
+// ======================
+function getDesportos(req, res) {
+  const sql = `
             SELECT 
             d.id AS desportoId,
             d.nome AS nome,
@@ -16,97 +16,196 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
             ORDER BY d.id ASC
         `;
 
-        conn.query(sql, (err, rows) => {
-            if (err)
-            return res.status(500).json({ ok: false, message: "Erro ao obter desportos." });
-            res.json({ ok: true, message: "Lista obtida com sucesso.", data: rows });
-        });
-    }
+  conn.query(sql, (err, rows) => {
+    if (err)
+      return res
+        .status(500)
+        .json({ ok: false, message: "Erro ao obter desportos." });
+    res.json({ ok: true, message: "Lista obtida com sucesso.", data: rows });
+  });
+}
 
-    // =====================================
-    //  ADD DESPORTO (POST) - evita duplicados
-    // =====================================
-    function addDesporto(req, res) {
+// =====================================
+//  ADD DESPORTO (POST) - evita duplicados
+// =====================================
+function addDesporto(req, res) {
   const nome = (req.body.nome || "").trim();
   const createdBy = req.user?.id;
 
   if (!nome || !createdBy)
-    return res.status(400).json({ ok: false, message: "Nome e utilizador são obrigatórios." });
+    return res
+      .status(400)
+      .json({ ok: false, message: "Nome e utilizador são obrigatórios." });
 
   // verifica duplicados
-  conn.query("SELECT id FROM Desporto WHERE LOWER(nome) = LOWER(?)", [nome], (err, rows) => {
-    if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
-    if (rows.length > 0)
-      return res.status(409).json({ ok: false, message: "Já existe um desporto com esse nome." });
+  conn.query(
+    "SELECT id FROM Desporto WHERE LOWER(nome) = LOWER(?)",
+    [nome],
+    (err, rows) => {
+      if (err)
+        return res
+          .status(500)
+          .json({ ok: false, message: "Erro de base de dados." });
+      if (rows.length > 0)
+        return res
+          .status(409)
+          .json({ ok: false, message: "Já existe um desporto com esse nome." });
 
-    // insere novo desporto
-    conn.query(
-      "INSERT INTO Desporto (nome, createdOn, createdBy) VALUES (?, CURDATE(), ?)",
-      [nome, createdBy],
-      (err, result) => {
-        if (err)
-          return res.status(500).json({ ok: false, message: "Erro ao adicionar desporto." });
-        res.status(201).json({ ok: true, message: "Desporto adicionado com sucesso.", desportoId: result.insertId });
-      }
-    );
+      // insere novo desporto
+      conn.query(
+        "INSERT INTO Desporto (nome, createdOn, createdBy) VALUES (?, CURDATE(), ?)",
+        [nome, createdBy],
+        (err, result) => {
+          if (err)
+            return res
+              .status(500)
+              .json({ ok: false, message: "Erro ao adicionar desporto." });
+          res.status(201).json({
+            ok: true,
+            message: "Desporto adicionado com sucesso.",
+            desportoId: result.insertId,
+          });
+        }
+      );
+    }
+  );
+}
+
+// =====================================
+//  UPDATE DESPORTO (PUT) - evita duplicados
+// =====================================
+function updateDesporto(req, res) {
+  const desportoId = req.params.id;
+  const nome = (req.body.nome || "").trim();
+
+  if (!desportoId || !nome)
+    return res.status(400).json({ ok: false, message: "Dados inválidos." });
+
+  // verifica duplicados
+  conn.query(
+    "SELECT id FROM Desporto WHERE LOWER(nome) = LOWER(?) AND id <> ?",
+    [nome, desportoId],
+    (err, rows) => {
+      if (err)
+        return res
+          .status(500)
+          .json({ ok: false, message: "Erro de base de dados." });
+      if (rows.length > 0)
+        return res.status(409).json({
+          ok: false,
+          message: "Já existe outro desporto com esse nome.",
+        });
+
+      // atualiza nome
+      conn.query(
+        "UPDATE Desporto SET nome = ? WHERE id = ?",
+        [nome, desportoId],
+        (err, result) => {
+          if (err)
+            return res
+              .status(500)
+              .json({ ok: false, message: "Erro ao atualizar desporto." });
+          if (result.affectedRows === 0)
+            return res
+              .status(404)
+              .json({ ok: false, message: "Desporto não encontrado." });
+
+          res.json({ ok: true, message: "Desporto atualizado com sucesso." });
+        }
+      );
+    }
+  );
+}
+
+// =====================================
+//  UPDATE TREINO (PUT)
+// =====================================
+function updateSessao(req, res) {
+  const sessaoId = req.params.id;
+  const { desportoId, duracao, localizacao, data, hora } = req.body;
+
+  if (!sessaoId || !desportoId || !duracao || !localizacao || !data || !hora)
+    return res.status(400).json({ ok: false, message: "Dados inválidos." });
+
+  const sql = `
+    UPDATE Sessao
+    SET desportoId = ?, duracao = ?, localizacao = ?, data = ?, hora = ?
+    WHERE id = ?
+  `;
+
+  conn.query(
+    sql,
+    [desportoId, duracao, localizacao, data, hora, sessaoId],
+    (err, result) => {
+      if (err)
+        return res
+          .status(500)
+          .json({ ok: false, message: "Erro ao atualizar sessão." });
+      if (result.affectedRows === 0)
+        return res
+          .status(404)
+          .json({ ok: false, message: "Sessão não encontrada." });
+
+      res.json({ ok: true, message: "Sessão atualizada com sucesso." });
+    }
+  );
+}
+
+// ========================
+// DELETE DESPORTO (DEL)
+// ========================
+function deleteDesporto(req, res) {
+  const desportoId = req.params.id;
+  if (!desportoId)
+    return res.status(400).json({ ok: false, message: "ID não fornecido." });
+
+  conn.query(
+    "DELETE FROM Desporto WHERE id = ?",
+    [desportoId],
+    (err, result) => {
+      if (err)
+        return res
+          .status(500)
+          .json({ ok: false, message: "Erro ao eliminar desporto." });
+      if (result.affectedRows === 0)
+        return res
+          .status(404)
+          .json({ ok: false, message: "Desporto não encontrado." });
+      res.json({ ok: true, message: "Desporto removido com sucesso." });
+    }
+  );
+}
+
+// =====================================
+//  DELETE TREINO (DELETE)
+// =====================================
+function deleteSessao(req, res) {
+  const sessaoId = req.params.id;
+
+  if (!sessaoId)
+    return res
+      .status(400)
+      .json({ ok: false, message: "ID da sessão não fornecido." });
+
+  conn.query("DELETE FROM Sessao WHERE id = ?", [sessaoId], (err, result) => {
+    if (err)
+      return res
+        .status(500)
+        .json({ ok: false, message: "Erro ao eliminar sessão." });
+    if (result.affectedRows === 0)
+      return res
+        .status(404)
+        .json({ ok: false, message: "Sessão não encontrada." });
+
+    res.json({ ok: true, message: "Sessão removida com sucesso." });
   });
 }
 
-
-    // =====================================
-    //  UPDATE DESPORTO (PUT) - evita duplicados
-    // =====================================
-    function updateDesporto(req, res) {
-        const desportoId = req.params.id;
-        const nome = (req.body.nome || "").trim();
-
-        if (!desportoId || !nome)
-            return res.status(400).json({ ok: false, message: "Dados inválidos." });
-
-        // verifica duplicados
-        conn.query(
-            "SELECT id FROM Desporto WHERE LOWER(nome) = LOWER(?) AND id <> ?",
-            [nome, desportoId],
-            (err, rows) => {
-            if (err) return res.status(500).json({ ok: false, message: "Erro de base de dados." });
-            if (rows.length > 0)
-                return res.status(409).json({ ok: false, message: "Já existe outro desporto com esse nome." });
-
-            // atualiza nome
-            conn.query("UPDATE Desporto SET nome = ? WHERE id = ?", [nome, desportoId], (err, result) => {
-                if (err)
-                return res.status(500).json({ ok: false, message: "Erro ao atualizar desporto." });
-                if (result.affectedRows === 0)
-                return res.status(404).json({ ok: false, message: "Desporto não encontrado." });
-
-                res.json({ ok: true, message: "Desporto atualizado com sucesso." });
-            });
-            }
-        );
-    }
-
-    // ========================
-    // DELETE DESPORTO (DEL)
-    // ========================
-    function deleteDesporto(req, res) {
-        const desportoId = req.params.id;
-        if (!desportoId)
-            return res.status(400).json({ ok: false, message: "ID não fornecido." });
-
-        conn.query("DELETE FROM Desporto WHERE id = ?", [desportoId], (err, result) => {
-            if (err)
-            return res.status(500).json({ ok: false, message: "Erro ao eliminar desporto." });
-            if (result.affectedRows === 0)
-            return res.status(404).json({ ok: false, message: "Desporto não encontrado." });
-            res.json({ ok: true, message: "Desporto removido com sucesso." });
-        });
-    }
-
-    // ==========================
-    // GET RANKINGS (GET)
-    // ==========================
-    function getRankings(req, res) {
-        const sql = `
+// ==========================
+// GET RANKINGS (GET)
+// ==========================
+function getRankings(req, res) {
+  const sql = `
             SELECT 
             u.id AS userId, u.nome AS nome, COUNT(l.id) AS totalLogins
             FROM User u
@@ -115,23 +214,30 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
             ORDER BY totalLogins DESC
         `;
 
-        conn.query(sql, (err, rows) => {
-            if (err)
-            return res.status(500).json({ ok: false, message: "Erro ao obter estatísticas." });
-            res.json({ ok: true, message: "Estatísticas obtidas com sucesso.", data: rows });
-        });
-    }
+  conn.query(sql, (err, rows) => {
+    if (err)
+      return res
+        .status(500)
+        .json({ ok: false, message: "Erro ao obter estatísticas." });
+    res.json({
+      ok: true,
+      message: "Estatísticas obtidas com sucesso.",
+      data: rows,
+    });
+  });
+}
 
+// ================================
+// GET SESSÕES (LISTAR) - do utilizador logado
+// ================================
+function getSessoes(req, res) {
+  const userId = req.user?.id;
+  if (!userId)
+    return res
+      .status(401)
+      .json({ ok: false, message: "Utilizador não autenticado." });
 
-    // ================================
-    // GET SESSÕES (LISTAR) - do utilizador logado
-    // ================================
-    function getSessoes(req, res) {
-        const userId = req.user?.id;
-        if (!userId)
-            return res.status(401).json({ ok: false, message: "Utilizador não autenticado." });
-
-        const sql = `
+  const sql = `
             SELECT 
                 s.id AS sessaoId,
                 d.nome AS desporto,
@@ -145,54 +251,70 @@ const bcrypt = require("bcrypt"); // para cifrar passwords
             ORDER BY s.data DESC, s.hora DESC
         `;
 
-        conn.query(sql, [userId], (err, rows) => {
-            if (err)
-                return res.status(500).json({ ok: false, message: "Erro ao obter sessões." });
-            res.json({ ok: true, message: "Lista de sessões obtida com sucesso.", data: rows });
-        });
-    }
+  conn.query(sql, [userId], (err, rows) => {
+    if (err)
+      return res
+        .status(500)
+        .json({ ok: false, message: "Erro ao obter sessões." });
+    res.json({
+      ok: true,
+      message: "Lista de sessões obtida com sucesso.",
+      data: rows,
+    });
+  });
+}
 
-    // ======================================
-    // ADD SESSÃO (POST) - registar novo treino
-    // ======================================
-    function addSessao(req, res) {
-        const userId = req.user?.id;
-        const { desportoId, duracao, localizacao, data, hora } = req.body;
+// ======================================
+// ADD SESSÃO (POST) - registar novo treino
+// ======================================
+function addSessao(req, res) {
+  const userId = req.user?.id;
+  const { desportoId, duracao, localizacao, data, hora } = req.body;
 
-        if (!userId)
-            return res.status(401).json({ ok: false, message: "Utilizador não autenticado." });
+  if (!userId)
+    return res
+      .status(401)
+      .json({ ok: false, message: "Utilizador não autenticado." });
 
-        if (!desportoId || !duracao || !localizacao || !data || !hora)
-            return res.status(400).json({ ok: false, message: "Todos os campos são obrigatórios." });
+  if (!desportoId || !duracao || !localizacao || !data || !hora)
+    return res
+      .status(400)
+      .json({ ok: false, message: "Todos os campos são obrigatórios." });
 
-        const sql = `
+  const sql = `
             INSERT INTO Sessao (userId, desportoId, duracao, localizacao, data, hora)
             VALUES (?, ?, ?, ?, ?, ?)
         `;
 
-        conn.query(sql, [userId, desportoId, duracao, localizacao, data, hora], (err, result) => {
-            if (err)
-                return res.status(500).json({ ok: false, message: "Erro ao registar a sessão." });
+  conn.query(
+    sql,
+    [userId, desportoId, duracao, localizacao, data, hora],
+    (err, result) => {
+      if (err)
+        return res
+          .status(500)
+          .json({ ok: false, message: "Erro ao registar a sessão." });
 
-            res.status(201).json({
-                ok: true,
-                message: "Sessão registada com sucesso.",
-                sessaoId: result.insertId
-            });
-        });
+      res.status(201).json({
+        ok: true,
+        message: "Sessão registada com sucesso.",
+        sessaoId: result.insertId,
+      });
     }
+  );
+}
 
-
-
-    // ==========================
-    // EXPORTAR FUNÇÕES
-    // ==========================
-    module.exports = {
-        getDesportos,
-        addDesporto,
-        updateDesporto,
-        deleteDesporto,
-        getRankings,
-        getSessoes,
-        addSessao
-    };
+// ==========================
+// EXPORTAR FUNÇÕES
+// ==========================
+module.exports = {
+  getDesportos,
+  addDesporto,
+  updateDesporto,
+  deleteDesporto,
+  getRankings,
+  getSessoes,
+  addSessao,
+  updateSessao,
+  deleteSessao
+};

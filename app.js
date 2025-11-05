@@ -55,9 +55,13 @@ app.post("/api/desportos", ensureAuthenticated, requestHandlers.addDesporto);
 app.put("/api/desportos/:id", ensureAuthenticated, requestHandlers.updateDesporto);
 app.delete("/api/desportos/:id", ensureAuthenticated, requestHandlers.deleteDesporto);
 app.get("/api/ranking", ensureAuthenticated, requestHandlers.getRankings);
-// --- SESSOES ---
+
+// --- TREINOS ---
 app.get("/api/sessoes", ensureAuthenticated, requestHandlers.getSessoes);
 app.post("/api/sessoes", ensureAuthenticated, requestHandlers.addSessao);
+app.put("/api/sessoes/:id", ensureAuthenticated, requestHandlers.updateSessao);
+app.delete("/api/sessoes/:id", ensureAuthenticated, requestHandlers.deleteSessao);
+
 
 
 // Páginas EJS protegidas
