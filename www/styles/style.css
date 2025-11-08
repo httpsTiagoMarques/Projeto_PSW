@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #4b6cb7, #182848);
+    background: linear-gradient(135deg, #59b74b, #18482a);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,7 +8,15 @@ body {
     margin: 0;
 }
 
-/* Corrige o problema de desalinhamento */
+.landing-container {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 600px;
+    text-align: center;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -44,10 +52,10 @@ input {
     font-size: 14px;
 }
 
-.login-button {
+.login-button, .enter-button {
     width: 100%;
     padding: 10px;
-    background: #4b6cb7;
+    background: #59b74b;
     color: white;
     border: none;
     border-radius: 6px;
@@ -56,5 +64,5 @@ input {
 }
 
 .login-button:hover {
-    background: #3b589e;
+    background: #59b74b;
 }

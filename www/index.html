@@ -1,32 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="./styles/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSW - Grupo 10</title>
+  <link rel="stylesheet" href="./styles/style.css">
 </head>
 <body>
-    <div class="login-container">
-      <h2>Projeto PSW Grupo 10</h2>
-        <h2>Login</h2>
-        <form id="loginForm" autocomplete="off">
-            <div class="input-group">
-              <label for="email">Email</label>
-              <input id="email" name="email" type="email" required autocomplete="off" />
-            </div>
-
-            <div class="input-group">
-              <label for="password">Password</label>
-              <input id="password" name="password" type="password" required autocomplete="new-password" />
-            </div>
-
-            <div id="msg" class="msg"></div>
-
-            <button type="submit" class="login-button">Log in</button>
-            <p class="register-link">Não tens conta? <a href="./registo.html">Regista-te</a></p>
-        </form>
-    </div>
-    <script src="./scripts/login.js"></script>
+  <div class="landing-container">
+    <h1>Bem-vindo ao projeto de PSW do Grupo 10</h1>
+    <p>Plataforma para gerir os teus treinos e acompanhar o teu progresso de forma simples e eficaz.</p>
+    <button class="enter-button" onclick="window.location.href='login.html'">Entrar</button>
+  </div>
 </body>
 </html>
