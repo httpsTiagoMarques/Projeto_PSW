@@ -1,3 +1,8 @@
+// ==============================================
+//  SCRIPT: Gestão de Sessões
+//  Descrição: controla o carregamento, criação, edição e remoção de sessões.
+// ==============================================
+
 window.addEventListener("DOMContentLoaded", function () {
   var tableBody = document.getElementById("sessoes-body");
   var addButton = document.getElementById("add-sessao-btn");
@@ -124,6 +129,9 @@ window.addEventListener("DOMContentLoaded", function () {
       });
   }
 
+  // ==========================
+  // Carregar desporto
+  // ==========================
   function carregarDesportosEditar(selecionado) {
   return fetch("/api/getDesportos")
     .then((res) => res.json())
@@ -141,7 +149,6 @@ window.addEventListener("DOMContentLoaded", function () {
     })
     .catch((err) => console.error("Erro ao carregar desportos para edição:", err));
 }
-
 
   // ==========================
   // Mostrar formulário criar
