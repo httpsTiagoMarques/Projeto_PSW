@@ -16,11 +16,15 @@ function getDesportos(req, res) {
             ORDER BY d.id ASC
         `;
 
+  // Executa a query na base de dados
   conn.query(sql, (err, rows) => {
+    // Caso ocorra um erro durante a execução da query,
+    // devolve uma resposta HTTP 500 (erro interno do servidor)
     if (err)
       return res
         .status(500)
         .json({ ok: false, message: "Erro ao obter desportos." });
+    // Caso não haja erros, devolve os dados em formato JSON:
     res.json({ ok: true, message: "Lista obtida com sucesso.", data: rows });
   });
 }
@@ -29,29 +33,37 @@ function getDesportos(req, res) {
 //  ADD DESPORTO (POST) - evita duplicados
 // =====================================
 function addDesporto(req, res) {
+  // Obtém o nome do desporto a partir do corpo do pedido (req.body)
+  // O trim() remove espaços em branco no início e fim
   const nome = (req.body.nome || "").trim();
+
+  // Obtém o ID do utilizador autenticado (guardado na sessão através do Passport)
   const createdBy = req.user?.id;
 
+  // Validação: verifica se o nome e o utilizador foram fornecidos
   if (!nome || !createdBy)
     return res
-      .status(400)
+      .status(400) // Código 400 = pedido mal formulado
       .json({ ok: false, message: "Nome e utilizador são obrigatórios." });
 
-  // verifica duplicados
+  // ===============================
+  // Verificação de duplicados
+  // ===============================
+  // Garante que não é inserido um desporto com o mesmo nome (case insensitive)
   conn.query(
     "SELECT id FROM Desporto WHERE LOWER(nome) = LOWER(?)",
     [nome],
     (err, rows) => {
       if (err)
         return res
-          .status(500)
+          .status(500)// Código 500 = erro no servidor
           .json({ ok: false, message: "Erro de base de dados." });
       if (rows.length > 0)
         return res
-          .status(409)
+          .status(409) // Se o nome já existir, retorna erro 409 (conflito)
           .json({ ok: false, message: "Já existe um desporto com esse nome." });
 
-      // insere novo desporto
+      // Se passou as verificações, insere o novo registo na tabela Desporto
       conn.query(
         "INSERT INTO Desporto (nome, createdOn, createdBy) VALUES (?, CURDATE(), ?)",
         [nome, createdBy],
@@ -60,10 +72,12 @@ function addDesporto(req, res) {
             return res
               .status(500)
               .json({ ok: false, message: "Erro ao adicionar desporto." });
+          
+          // Resposta de sucesso (201 = criado com sucesso)
           res.status(201).json({
             ok: true,
             message: "Desporto adicionado com sucesso.",
-            desportoId: result.insertId,
+            desportoId: result.insertId, // Retorna o ID do novo desporto
           });
         }
       );
@@ -75,9 +89,13 @@ function addDesporto(req, res) {
 //  UPDATE DESPORTO (PUT) - evita duplicados
 // =====================================
 function updateDesporto(req, res) {
+  // Obtém o ID do desporto a atualizar, enviado como parâmetro na rota
   const desportoId = req.params.id;
+  
+  // Obtém e limpa o novo nome do desporto a partir do corpo do pedido
   const nome = (req.body.nome || "").trim();
 
+  // Validação: se faltar o ID ou o nome, o pedido é inválido
   if (!desportoId || !nome)
     return res.status(400).json({ ok: false, message: "Dados inválidos." });
 
@@ -86,30 +104,35 @@ function updateDesporto(req, res) {
     "SELECT id FROM Desporto WHERE LOWER(nome) = LOWER(?) AND id <> ?",
     [nome, desportoId],
     (err, rows) => {
+      // Caso ocorra erro na consulta à base de dados
       if (err)
         return res
           .status(500)
           .json({ ok: false, message: "Erro de base de dados." });
+      // Se encontrar outro desporto com o mesmo nome, devolve erro 409 (conflito)
       if (rows.length > 0)
         return res.status(409).json({
           ok: false,
           message: "Já existe outro desporto com esse nome.",
         });
 
-      // atualiza nome
+      // Caso não haja duplicados, procede à atualização do nome
       conn.query(
         "UPDATE Desporto SET nome = ? WHERE id = ?",
         [nome, desportoId],
         (err, result) => {
+          // Se ocorrer erro durante a atualização
           if (err)
             return res
               .status(500)
               .json({ ok: false, message: "Erro ao atualizar desporto." });
+          // Se nenhuma linha for afetada, o ID não existe (desporto não encontrado)
           if (result.affectedRows === 0)
             return res
               .status(404)
               .json({ ok: false, message: "Desporto não encontrado." });
 
+          // Se tudo correr bem, devolve confirmação de sucesso
           res.json({ ok: true, message: "Desporto atualizado com sucesso." });
         }
       );
