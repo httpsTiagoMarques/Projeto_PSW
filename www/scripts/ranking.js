@@ -1,4 +1,8 @@
-// www/scripts/ranking.js
+// ==============================================
+//  SCRIPT: Rankings de login
+//  Descrição: Receção de dados da tabela ranking
+// ==============================================
+
 
 // Espera até que todo o conteúdo da página (HTML) esteja carregado
 window.addEventListener("DOMContentLoaded", function () {

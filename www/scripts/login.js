@@ -1,4 +1,8 @@
-// www/scripts/login.js
+// ==============================================
+//  SCRIPT: Login de utilizadores
+//  Descrição: Efetuar login utilizadores
+// ==============================================
+
 
 // Força refresh total ao voltar para esta página (evita cache após logout)
 window.addEventListener("pageshow", function (event) {

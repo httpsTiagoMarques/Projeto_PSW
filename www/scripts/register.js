@@ -1,3 +1,8 @@
+// ==============================================
+//  SCRIPT: Registo de utilizadores
+//  Descrição: Efetuar registo de novos utilizadores
+// ==============================================
+
 document.getElementById("regForm").addEventListener("submit", function (ev) {
   ev.preventDefault(); // impede o envio normal do formulário
 
@@ -10,7 +15,7 @@ document.getElementById("regForm").addEventListener("submit", function (ev) {
   msg.className = "msg";
   msg.textContent = "";
 
-  // validação simples
+  // validação
   if (!nome || !email || !password) {
     msg.classList.add("err");
     msg.textContent = "Preenche todos os campos.";

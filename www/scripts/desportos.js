@@ -1,4 +1,8 @@
-// www/scripts/desportos.js
+// ==============================================
+//  SCRIPT: Desportos
+//  Descrição: controla o carregamento, criação, edição e remoção de desportos.
+// ==============================================
+
 
 window.addEventListener("DOMContentLoaded", function () {
   var tableBody = document.getElementById("desportos-body");
@@ -16,12 +20,14 @@ window.addEventListener("DOMContentLoaded", function () {
   // ==========================
   // Carregar lista de desportos
   // ==========================
+  // Faz pedido à API e preenche a tabela com os desportos disponíveis
   function carregarDesportos() {
     fetch("/api/getDesportos")
       .then(function (res) { return res.json(); })
       .then(function (data) {
         tableBody.innerHTML = "";
 
+        // Se existirem desportos, percorre e adiciona as linhas na tabela
         if (data.ok && data.data.length > 0) {
           data.data.forEach(function (item) {
             var row = document.createElement("tr");
@@ -66,10 +72,13 @@ window.addEventListener("DOMContentLoaded", function () {
               }
             });
           });
-        } else {
+        }
+        // Caso não existam desportos, mostra mensagem 
+        else {
           tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Sem dados disponíveis</td></tr>`;
         }
       })
+      // Caso o pedido falhe
       .catch(function (err) {
         console.error("Erro ao carregar desportos:", err);
         tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Erro ao obter dados</td></tr>`;
@@ -79,11 +88,13 @@ window.addEventListener("DOMContentLoaded", function () {
   // ==========================
   // Mostrar formulário de criar
   // ==========================
+  // Mostra o formulário de criação e oculta o de edição
   addButton.addEventListener("click", function () {
     formBox.style.display = "block";
     editBox.style.display = "none";
   });
 
+  // Cancela criação e limpa o campo de texto
   cancelBtn.addEventListener("click", function () {
     formBox.style.display = "none";
     nomeInput.value = "";
@@ -92,6 +103,7 @@ window.addEventListener("DOMContentLoaded", function () {
   // ==========================
   // Submeter formulário de criação
   // ==========================
+  // Cria um novo desporto após validação do campo
   createForm.addEventListener("submit", function (e) {
     e.preventDefault();
 
@@ -101,6 +113,7 @@ window.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    // Envia dados para a API
     fetch("/api/desportos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -125,6 +138,7 @@ window.addEventListener("DOMContentLoaded", function () {
   // ==========================
   // Submeter formulário de edição
   // ==========================
+  // Atualiza um desporto existente com base no ID
   editForm.addEventListener("submit", function (e) {
     e.preventDefault();
 
@@ -135,6 +149,7 @@ window.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    // Envia atualização para a API
     fetch("/api/desportos/" + id, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -155,6 +170,7 @@ window.addEventListener("DOMContentLoaded", function () {
       });
   });
 
+  // Cancela a edição e limpa o campo
   cancelEditBtn.addEventListener("click", function () {
     editBox.style.display = "none";
     editNome.value = "";
@@ -163,5 +179,6 @@ window.addEventListener("DOMContentLoaded", function () {
   // ==========================
   // Iniciar
   // ==========================
+  // Ao carregar a página, obtém os desportos existentes
   carregarDesportos();
 });

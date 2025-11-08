@@ -1,4 +1,8 @@
-// www/scripts/estatisticas.js
+// ==============================================
+//  SCRIPT: Estatisticas do utilizador
+//  Descrição: Efetuar registo de novos utilizadores
+// ==============================================
+
 
 // Aguarda o carregamento completo do DOM
 window.addEventListener("DOMContentLoaded", function () {

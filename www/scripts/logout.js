@@ -1,4 +1,8 @@
-// www/scripts/logout.js
+// ==============================================
+//  SCRIPT: Logout
+//  Descrição: Termina e elimina os dados de sessão
+// ==============================================
+
 
 // Espera o carregamento completo da página
 document.addEventListener("DOMContentLoaded", function () {
