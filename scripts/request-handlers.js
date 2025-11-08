@@ -159,10 +159,28 @@ function deleteDesporto(req, res) {
   if (!desportoId)
     return res.status(400).json({ ok: false, message: "ID não fornecido." });
 
-  conn.query(
-    "DELETE FROM Desporto WHERE id = ?",
-    [desportoId],
-    (err, result) => {
+  // Verifica se existem sessões associadas a este desporto
+  const sqlCheck = "SELECT COUNT(*) AS total FROM Sessao WHERE desportoId = ?";
+
+  conn.query(sqlCheck, [desportoId], (err, rows) => {
+    if (err)
+      return res
+        .status(500)
+        .json({ ok: false, message: "Erro ao verificar sessões associadas." });
+
+    const totalSessoes = rows[0].total;
+
+    // Se houver sessões registadas, impede a remoção
+    if (totalSessoes > 0) {
+      return res.status(409).json({
+        ok: false,
+        message:
+          "Não é possível remover este desporto, pois existem sessões associadas.",
+      });
+    }
+
+    // Caso contrário, elimina o desporto
+    conn.query("DELETE FROM Desporto WHERE id = ?", [desportoId], (err, result) => {
       if (err)
         return res
           .status(500)
@@ -171,10 +189,12 @@ function deleteDesporto(req, res) {
         return res
           .status(404)
           .json({ ok: false, message: "Desporto não encontrado." });
+
       res.json({ ok: true, message: "Desporto removido com sucesso." });
-    }
-  );
+    });
+  });
 }
+
 
 // =====================================
 //  DELETE TREINO (DELETE)
@@ -304,7 +324,7 @@ function addSessao(req, res) {
   );
 }
 
- // ==============================
+    // ==============================
     // GET ESTATÍSTICAS DO UTILIZADOR
     // ==============================
     function getEstatisticas(req, res) {
