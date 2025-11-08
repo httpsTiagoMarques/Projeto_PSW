@@ -1,10 +1,15 @@
-/* ===== NAVBAR ===== */
+/* =========================================================
+   BASE
+   ========================================================= */
 body {
   font-family: Arial, sans-serif;
   background: #f4f6fa;
   margin: 0;
 }
 
+/* =========================================================
+   NAVBAR
+   ========================================================= */
 .navbar {
   position: fixed;
   top: 0;
@@ -21,6 +26,7 @@ body {
   z-index: 100;
 }
 
+/* Links da navbar */
 .navbar-links {
   list-style: none;
   display: flex;
@@ -42,6 +48,7 @@ body {
   opacity: 0.8;
 }
 
+/* Botão de logout */
 .logout-button {
   background: white;
   color: #59b74b !important;
@@ -57,7 +64,9 @@ body {
   color: #64b74b;
 }
 
-/* ===== CONTEÚDO PRINCIPAL ===== */
+/* =========================================================
+   CONTEÚDO PRINCIPAL
+   ========================================================= */
 .content {
   margin-top: 80px;
   display: flex;
@@ -82,7 +91,9 @@ body {
   margin-bottom: 20px;
 }
 
-/* ===== TABELAS ===== */
+/* =========================================================
+   TABELAS
+   ========================================================= */
 .stats-table {
   width: 100%;
   border-collapse: collapse;
@@ -111,7 +122,9 @@ body {
   background-color: #eef3ff;
 }
 
-/* ===== BOTÕES ===== */
+/* =========================================================
+   BOTÕES
+   ========================================================= */
 .actions {
   text-align: center;
 }
@@ -125,6 +138,7 @@ body {
   margin: 4px;
 }
 
+/* Cores dos botões */
 .add-button {
   background-color: #59b74b;
   color: white;
@@ -150,6 +164,7 @@ body {
   color: white;
 }
 
+/* Hovers */
 .add-button:hover, .edit-btn:hover {
   background-color: #59b74b;
 }
@@ -166,6 +181,7 @@ body {
   background-color: #b02a37;
 }
 
+/* Inputs do form lateral */
 #form-box input {
   width: 100%;
   padding: 8px;
@@ -174,7 +190,9 @@ body {
   margin-top: 5px;
 }
 
-/* ===== ESTATÍSTICAS ===== */
+/* =========================================================
+   ESTATÍSTICAS (CARDS)
+   ========================================================= */
 .stats-container {
   display: flex;
   justify-content: space-around;

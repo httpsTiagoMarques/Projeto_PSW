@@ -1,3 +1,13 @@
+/* =========================================================
+   RESET & BASE
+   ========================================================= */
+
+/* Garantir box-sizing consistente */
+* {
+    box-sizing: border-box;
+}
+
+/* Base da página (landing/login) */
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #59b74b, #18482a);
@@ -8,6 +18,11 @@ body {
     margin: 0;
 }
 
+/* =========================================================
+   CONTAINERS
+   ========================================================= */
+
+/* Container da landing page */
 .landing-container {
     background: #fff;
     padding: 30px 40px;
@@ -17,10 +32,7 @@ body {
     text-align: center;
 }
 
-* {
-    box-sizing: border-box;
-}
-
+/* Container do login */
 .login-container {
     background: #fff;
     padding: 30px 40px;
@@ -30,11 +42,20 @@ body {
     text-align: center;
 }
 
+/* =========================================================
+   TIPOGRAFIA
+   ========================================================= */
+
 .login-container h2 {
     margin-bottom: 20px;
     color: #333;
 }
 
+/* =========================================================
+   FORMULÁRIOS
+   ========================================================= */
+
+/* Labels do formulário */
 label {
     display: block;
     text-align: left;
@@ -43,6 +64,7 @@ label {
     color: #555;
 }
 
+/* Inputs do formulário */
 input {
     width: 100%;
     padding: 10px;
@@ -52,6 +74,11 @@ input {
     font-size: 14px;
 }
 
+/* =========================================================
+   BOTÕES
+   ========================================================= */
+
+/* Botões principais (login/entrar) */
 .login-button, .enter-button {
     width: 100%;
     padding: 10px;
@@ -63,6 +90,7 @@ input {
     cursor: pointer;
 }
 
+/* Hover dos botões */
 .login-button:hover {
     background: #59b74b;
 }
