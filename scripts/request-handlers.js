@@ -144,9 +144,13 @@ function updateDesporto(req, res) {
 //  UPDATE TREINO (PUT)
 // =====================================
 function updateSessao(req, res) {
+  // Obtém o ID da sessão a partir dos parâmetros da rota
   const sessaoId = req.params.id;
+  
+  // Extrai os campos enviados no corpo do pedido (JSON)
   const { desportoId, duracao, localizacao, data, hora } = req.body;
 
+  // Validação: garante que todos os campos obrigatórios foram fornecidos
   if (!sessaoId || !desportoId || !duracao || !localizacao || !data || !hora)
     return res.status(400).json({ ok: false, message: "Dados inválidos." });
 
@@ -156,19 +160,23 @@ function updateSessao(req, res) {
     WHERE id = ?
   `;
 
+  // Executa a query, passando os valores na ordem correta
   conn.query(
     sql,
     [desportoId, duracao, localizacao, data, hora, sessaoId],
     (err, result) => {
+      // Caso ocorra erro na base de dados
       if (err)
         return res
           .status(500)
           .json({ ok: false, message: "Erro ao atualizar sessão." });
+      // Se nenhuma linha for afetada, significa que o ID da sessão não existe
       if (result.affectedRows === 0)
         return res
           .status(404)
           .json({ ok: false, message: "Sessão não encontrada." });
-
+      
+      // Caso o update seja bem-sucedido, envia resposta positiva
       res.json({ ok: true, message: "Sessão atualizada com sucesso." });
     }
   );
@@ -178,19 +186,26 @@ function updateSessao(req, res) {
 // DELETE DESPORTO (DEL)
 // ========================
 function deleteDesporto(req, res) {
+  
+  // Obtém o ID do desporto a remover, passado como parâmetro na rota
   const desportoId = req.params.id;
+
+  // Validação inicial: verifica se o ID foi fornecido
   if (!desportoId)
     return res.status(400).json({ ok: false, message: "ID não fornecido." });
 
   // Verifica se existem sessões associadas a este desporto
   const sqlCheck = "SELECT COUNT(*) AS total FROM Sessao WHERE desportoId = ?";
 
+  // Executa a query para contar quantas sessões estão ligadas ao desporto
   conn.query(sqlCheck, [desportoId], (err, rows) => {
+    // Caso ocorra um erro de base de dados, devolve erro 500
     if (err)
       return res
         .status(500)
         .json({ ok: false, message: "Erro ao verificar sessões associadas." });
 
+    // Extrai o número total de sessões encontradas
     const totalSessoes = rows[0].total;
 
     // Se houver sessões registadas, impede a remoção
@@ -204,15 +219,18 @@ function deleteDesporto(req, res) {
 
     // Caso contrário, elimina o desporto
     conn.query("DELETE FROM Desporto WHERE id = ?", [desportoId], (err, result) => {
+      // Caso ocorra erro durante a eliminação
       if (err)
         return res
           .status(500)
           .json({ ok: false, message: "Erro ao eliminar desporto." });
+      // Se nenhuma linha for afetada, o ID não existe (desporto não encontrado)
       if (result.affectedRows === 0)
         return res
           .status(404)
           .json({ ok: false, message: "Desporto não encontrado." });
 
+      // Eliminação bem-sucedida — devolve mensagem de confirmação
       res.json({ ok: true, message: "Desporto removido com sucesso." });
     });
   });
@@ -223,23 +241,30 @@ function deleteDesporto(req, res) {
 //  DELETE TREINO (DELETE)
 // =====================================
 function deleteSessao(req, res) {
+  
+  // Obtém o ID da sessão a partir dos parâmetros da rota
   const sessaoId = req.params.id;
 
+  // Validação inicial: verifica se o ID foi fornecido
   if (!sessaoId)
     return res
       .status(400)
       .json({ ok: false, message: "ID da sessão não fornecido." });
 
+  // Executa a query SQL para eliminar a sessão correspondente ao ID indicado
   conn.query("DELETE FROM Sessao WHERE id = ?", [sessaoId], (err, result) => {
+    // Caso ocorra um erro de base de dados
     if (err)
       return res
         .status(500)
         .json({ ok: false, message: "Erro ao eliminar sessão." });
+    // Se nenhuma linha for afetada, significa que o ID não existe
     if (result.affectedRows === 0)
       return res
         .status(404)
         .json({ ok: false, message: "Sessão não encontrada." });
 
+    // Caso tudo corra bem, devolve confirmação de remoção
     res.json({ ok: true, message: "Sessão removida com sucesso." });
   });
 }
@@ -248,6 +273,14 @@ function deleteSessao(req, res) {
 // GET RANKINGS (GET)
 // ==========================
 function getRankings(req, res) {
+  // ===============================================
+  // Query SQL:
+  // - Seleciona o ID e o nome de cada utilizador.
+  // - Conta o número de registos na tabela UserLog (total de logins por utilizador).
+  // - Usa LEFT JOIN para incluir utilizadores que ainda não tenham logins registados.
+  // - Agrupa por ID e nome para garantir contagem individual.
+  // - Ordena do utilizador com mais logins para o com menos.
+  // ===============================================
   const sql = `
             SELECT 
             u.id AS userId, u.nome AS nome, COUNT(l.id) AS totalLogins
@@ -257,28 +290,43 @@ function getRankings(req, res) {
             ORDER BY totalLogins DESC
         `;
 
+  // Executa a query SQL e trata o resultado
   conn.query(sql, (err, rows) => {
+    // Caso ocorra erro ao comunicar com a base de dados
     if (err)
       return res
         .status(500)
         .json({ ok: false, message: "Erro ao obter estatísticas." });
+    // Se correr bem, devolve a lista ordenada de utilizadores e respetivos logins
     res.json({
       ok: true,
       message: "Estatísticas obtidas com sucesso.",
-      data: rows,
+      data: rows, // Array com objetos: { userId, nome, totalLogins }
     });
   });
 }
 
 // ================================
-// GET SESSÕES (LISTAR) - do utilizador logado
+// GET SESSÕES (LISTAR) - do utilizador atual
 // ================================
 function getSessoes(req, res) {
+
+  // Obtém o ID do utilizador autenticado a partir da sessão (Passport.js)
   const userId = req.user?.id;
+
+  // Caso o utilizador não esteja autenticado, retorna erro 401 (não autorizado)
   if (!userId)
     return res
       .status(401)
       .json({ ok: false, message: "Utilizador não autenticado." });
+
+  // ===============================================
+  // Query SQL:
+  // - Seleciona o ID da sessão, nome do desporto e demais detalhes.
+  // - Faz INNER JOIN com a tabela Desporto para obter o nome do desporto.
+  // - Filtra apenas as sessões pertencentes ao utilizador autenticado.
+  // - Ordena os resultados da mais recente para a mais antiga.
+  // ===============================================
 
   const sql = `
             SELECT 
@@ -294,15 +342,18 @@ function getSessoes(req, res) {
             ORDER BY s.data DESC, s.hora DESC
         `;
 
+  // Executa a query na base de dados e trata o resultado
   conn.query(sql, [userId], (err, rows) => {
+    // Caso ocorra erro na execução da query
     if (err)
       return res
         .status(500)
         .json({ ok: false, message: "Erro ao obter sessões." });
+    // Caso bem-sucedido, devolve a lista de sessões do utilizador
     res.json({
       ok: true,
       message: "Lista de sessões obtida com sucesso.",
-      data: rows,
+      data: rows, // Array de objetos contendo as sessões do utilizador
     });
   });
 }
@@ -311,14 +362,20 @@ function getSessoes(req, res) {
 // ADD SESSÃO (POST) - registar novo treino
 // ======================================
 function addSessao(req, res) {
+  
+  // Obtém o ID do utilizador autenticado (armazenado na sessão)
   const userId = req.user?.id;
+
+  // Extrai os campos enviados no corpo da requisição
   const { desportoId, duracao, localizacao, data, hora } = req.body;
 
+  // Caso o utilizador não esteja autenticado
   if (!userId)
     return res
       .status(401)
       .json({ ok: false, message: "Utilizador não autenticado." });
 
+  // Caso algum dos campos obrigatórios esteja ausente
   if (!desportoId || !duracao || !localizacao || !data || !hora)
     return res
       .status(400)
@@ -328,20 +385,22 @@ function addSessao(req, res) {
             INSERT INTO Sessao (userId, desportoId, duracao, localizacao, data, hora)
             VALUES (?, ?, ?, ?, ?, ?)
         `;
-
+  // Executa a query de inserção
   conn.query(
     sql,
     [userId, desportoId, duracao, localizacao, data, hora],
     (err, result) => {
+      // Caso ocorra erro de base de dados
       if (err)
         return res
           .status(500)
           .json({ ok: false, message: "Erro ao registar a sessão." });
 
+      // Caso a inserção seja bem-sucedida
       res.status(201).json({
         ok: true,
         message: "Sessão registada com sucesso.",
-        sessaoId: result.insertId,
+        sessaoId: result.insertId, // ID gerado automaticamente pelo MySQL
       });
     }
   );
@@ -404,7 +463,7 @@ function addSessao(req, res) {
         });
     }
 
-    // ===================================
+  // ===================================
   // GET ESTATÍSTICAS POR DESPORTO (UTILIZADOR ATUAL)
   // ===================================
   function getEstatisticasPorDesporto(req, res) {
