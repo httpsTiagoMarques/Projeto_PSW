@@ -50,11 +50,13 @@ function ensureAuthenticated(req, res, next) {
 app.use("/authentication", authenticationRoutes);
 
 
-// APIs protegidas
+// REST
 app.get("/api/getDesportos", ensureAuthenticated, requestHandlers.getDesportos);
 app.post("/api/desportos", ensureAuthenticated, requestHandlers.addDesporto);
 app.put("/api/desportos/:id", ensureAuthenticated, requestHandlers.updateDesporto);
 app.delete("/api/desportos/:id", ensureAuthenticated, requestHandlers.deleteDesporto);
+
+//  --- Rankings ---
 app.get("/api/ranking", ensureAuthenticated, requestHandlers.getRankings);
 
 // --- TREINOS ---
@@ -68,7 +70,7 @@ app.get("/api/estatisticas", ensureAuthenticated, requestHandlers.getEstatistica
 app.get("/api/estatisticasPorDesporto", ensureAuthenticated, requestHandlers.getEstatisticasPorDesporto);
 
 
-// Páginas EJS protegidas
+// --- Páginas EJS protegidas ---
 app.get("/dashboard", ensureAuthenticated, (req, res) => {
   res.render("dashboard", { nome: req.user.nome, userId: req.user.id });
 });
