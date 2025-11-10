@@ -37,7 +37,7 @@ window.addEventListener("DOMContentLoaded", function () {
     const dados = {
       nome: nomeInput.value.trim(),
       email: emailInput.value.trim(),
-      password: passwordInput.value.trim(), // pode ser vazio
+      password: passwordInput.value.trim() // pode ser vazio
     };
 
     fetch("/api/user/profile", {
@@ -45,9 +45,16 @@ window.addEventListener("DOMContentLoaded", function () {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados),
     })
-      .then((res) => res.json())
-      .catch((err) => {
+      .then(res => res.json())
+      .then(response => {
+        alert(response.message);
+
+        // Depois de gravar, recarrega os dados
+        carregarPerfil();
+      })
+      .catch(err => {
         console.error("Erro ao atualizar perfil:", err);
+        alert("Erro ao atualizar perfil.");
       });
   }
 
