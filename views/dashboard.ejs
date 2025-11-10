@@ -3,48 +3,124 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Perfil</title>
+    <title>Dashboard - Sessões</title>
     <link rel="stylesheet" href="/styles/views.css" />
   </head>
   <body>
-    <!-- Navbar igual às outras páginas -->
+    <!-- Barra de navegação -->
     <%- include("navbar") %>
 
     <!-- Conteúdo principal -->
     <div class="content">
       <div
         class="dashboard-box"
-        id="perfil-box"
-        style="flex: 1; max-width: 450px; text-align: left"
+        style="display: flex; gap: 30px; justify-content: center"
       >
-        <h3>Editar Perfil</h3>
+        <!-- Tabela de sessões -->
+        <div style="flex: 2">
+          <h2>As tuas Sessões</h2>
+          <button id="add-sessao-btn" class="add-button">
+            + Adicionar Sessão
+          </button>
 
-        <form id="perfil-form">
-          <!-- ID oculto -->
-          <input type="hidden" id="user-id" value="<%= userId %>" />
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Desporto</th>
+                <th>Duração</th>
+                <th>Localização</th>
+                <th>Data</th>
+                <th>Hora</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="sessoes-body"></tbody>
+          </table>
+        </div>
 
-          <label for="nome">Nome:</label>
-          <input type="text" id="nome" required /><br /><br />
+        <!-- Formulário para criar nova sessão -->
+        <div
+          class="dashboard-box"
+          id="form-box"
+          style="flex: 1; display: none; text-align: left"
+        >
+          <h3>Nova Sessão</h3>
+          <form id="create-form">
+            <label for="desporto-select">Desporto:</label>
+            <select id="desporto-select" name="desportoId" required></select
+            ><br /><br />
 
-          <label for="email">Email:</label>
-          <input type="email" id="email" required /><br /><br />
+            <label for="duracao">Duração (min):</label>
+            <input
+              type="number"
+              id="duracao"
+              name="duracao"
+              placeholder="Ex: 60"
+              required
+            /><br /><br />
 
-          <label for="password">Nova Password:</label>
-          <input
-            type="password"
-            id="password"
-            placeholder="Deixa vazio para não alterar"
-          /><br /><br />
+            <label for="localizacao">Localização:</label>
+            <input
+              type="text"
+              id="localizacao"
+              name="localizacao"
+              placeholder="Ex: Ginásio X ou Localidade"
+              required
+            /><br /><br />
 
-          <div style="margin-top: 15px">
-            <button type="submit" class="create-btn">Guardar</button>
-          </div>
-        </form>
+            <label for="data">Data:</label>
+            <input type="date" id="data" name="data" required /><br /><br />
+
+            <label for="hora">Hora:</label>
+            <input type="time" id="hora" name="hora" required /><br /><br />
+
+            <div style="margin-top: 15px">
+              <button type="submit" class="create-btn">Criar</button>
+              <button type="button" id="cancel-btn" class="cancel-btn">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+        <!-- Formulário para editar -->
+        <div
+          class="dashboard-box"
+          id="edit-box"
+          style="flex: 1; display: none; text-align: left"
+        >
+          <h3>Editar Sessão</h3>
+          <form id="edit-form">
+            <input type="hidden" id="edit-id" name="id" />
+
+            <label for="edit-desporto">Desporto:</label>
+            <select id="edit-desporto" name="desportoId" required></select
+            ><br /><br />
+
+            <label for="edit-duracao">Duração (min):</label>
+            <input type="number" id="edit-duracao" required /><br /><br />
+
+            <label for="edit-localizacao">Localização:</label>
+            <input type="text" id="edit-localizacao" required /><br /><br />
+
+            <label for="edit-data">Data:</label>
+            <input type="date" id="edit-data" required /><br /><br />
+
+            <label for="edit-hora">Hora:</label>
+            <input type="time" id="edit-hora" required /><br /><br />
+
+            <div style="margin-top: 15px">
+              <button type="submit" class="create-btn">Guardar</button>
+              <button type="button" id="cancel-edit-btn" class="cancel-btn">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
-    <!-- JS -->
-    <script src="/scripts/perfil.js"></script>
+    <script src="/scripts/dashboard.js"></script>
     <script src="/scripts/logout.js"></script>
   </body>
 </html>
