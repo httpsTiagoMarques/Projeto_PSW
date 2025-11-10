@@ -56,7 +56,7 @@ function addDesporto(req, res) {
     (err, rows) => {
       if (err)
         return res
-          .status(500)// Código 500 = erro no servidor
+          .status(500) // Código 500 = erro no servidor
           .json({ ok: false, message: "Erro de base de dados." });
       if (rows.length > 0)
         return res
@@ -72,7 +72,7 @@ function addDesporto(req, res) {
             return res
               .status(500)
               .json({ ok: false, message: "Erro ao adicionar desporto." });
-          
+
           // Resposta de sucesso (201 = criado com sucesso)
           res.status(201).json({
             ok: true,
@@ -91,7 +91,7 @@ function addDesporto(req, res) {
 function updateDesporto(req, res) {
   // Obtém o ID do desporto a atualizar, enviado como parâmetro na rota
   const desportoId = req.params.id;
-  
+
   // Obtém e limpa o novo nome do desporto a partir do corpo do pedido
   const nome = (req.body.nome || "").trim();
 
@@ -146,7 +146,7 @@ function updateDesporto(req, res) {
 function updateSessao(req, res) {
   // Obtém o ID da sessão a partir dos parâmetros da rota
   const sessaoId = req.params.id;
-  
+
   // Extrai os campos enviados no corpo do pedido (JSON)
   const { desportoId, duracao, localizacao, data, hora } = req.body;
 
@@ -175,7 +175,7 @@ function updateSessao(req, res) {
         return res
           .status(404)
           .json({ ok: false, message: "Sessão não encontrada." });
-      
+
       // Caso o update seja bem-sucedido, envia resposta positiva
       res.json({ ok: true, message: "Sessão atualizada com sucesso." });
     }
@@ -186,7 +186,6 @@ function updateSessao(req, res) {
 // DELETE DESPORTO (DEL)
 // ========================
 function deleteDesporto(req, res) {
-  
   // Obtém o ID do desporto a remover, passado como parâmetro na rota
   const desportoId = req.params.id;
 
@@ -218,30 +217,32 @@ function deleteDesporto(req, res) {
     }
 
     // Caso contrário, elimina o desporto
-    conn.query("DELETE FROM Desporto WHERE id = ?", [desportoId], (err, result) => {
-      // Caso ocorra erro durante a eliminação
-      if (err)
-        return res
-          .status(500)
-          .json({ ok: false, message: "Erro ao eliminar desporto." });
-      // Se nenhuma linha for afetada, o ID não existe (desporto não encontrado)
-      if (result.affectedRows === 0)
-        return res
-          .status(404)
-          .json({ ok: false, message: "Desporto não encontrado." });
+    conn.query(
+      "DELETE FROM Desporto WHERE id = ?",
+      [desportoId],
+      (err, result) => {
+        // Caso ocorra erro durante a eliminação
+        if (err)
+          return res
+            .status(500)
+            .json({ ok: false, message: "Erro ao eliminar desporto." });
+        // Se nenhuma linha for afetada, o ID não existe (desporto não encontrado)
+        if (result.affectedRows === 0)
+          return res
+            .status(404)
+            .json({ ok: false, message: "Desporto não encontrado." });
 
-      // Eliminação bem-sucedida — devolve mensagem de confirmação
-      res.json({ ok: true, message: "Desporto removido com sucesso." });
-    });
+        // Eliminação bem-sucedida — devolve mensagem de confirmação
+        res.json({ ok: true, message: "Desporto removido com sucesso." });
+      }
+    );
   });
 }
-
 
 // =====================================
 //  DELETE TREINO (DELETE)
 // =====================================
 function deleteSessao(req, res) {
-  
   // Obtém o ID da sessão a partir dos parâmetros da rota
   const sessaoId = req.params.id;
 
@@ -310,7 +311,6 @@ function getRankings(req, res) {
 // GET SESSÕES (LISTAR) - do utilizador atual
 // ================================
 function getSessoes(req, res) {
-
   // Obtém o ID do utilizador autenticado a partir da sessão (Passport.js)
   const userId = req.user?.id;
 
@@ -362,7 +362,6 @@ function getSessoes(req, res) {
 // ADD SESSÃO (POST) - registar novo treino
 // ======================================
 function addSessao(req, res) {
-  
   // Obtém o ID do utilizador autenticado (armazenado na sessão)
   const userId = req.user?.id;
 
@@ -406,27 +405,31 @@ function addSessao(req, res) {
   );
 }
 
-    // ==============================
-    // GET ESTATÍSTICAS DO UTILIZADOR
-    // ==============================
-    function getEstatisticas(req, res) {
-        // Obtém o ID do utilizador autenticado (guardado na sessão pelo Passport)
-        const userId = req.user?.id;
+// ==============================
+// GET ESTATÍSTICAS DO UTILIZADOR
+// ==============================
+function getEstatisticas(req, res) {
+  // Obtém o ID do utilizador autenticado (guardado na sessão pelo Passport)
+  const userId = req.user?.id;
 
-        // Se não houver utilizador autenticado, devolve erro 401 (não autorizado)
-        if (!userId)
-            return res.status(401).json({ ok: false, message: "Utilizador não autenticado." });
+  // Se não houver utilizador autenticado, devolve erro 401 (não autorizado)
+  if (!userId)
+    return res
+      .status(401)
+      .json({ ok: false, message: "Utilizador não autenticado." });
 
-        // ===== Número total de sessões =====
-        const sqlTotal = "SELECT COUNT(*) AS totalSessoes FROM Sessao WHERE userId = ?";
+  // ===== Número total de sessões =====
+  const sqlTotal =
+    "SELECT COUNT(*) AS totalSessoes FROM Sessao WHERE userId = ?";
 
-        // ===== Tempo total de todas as sessões =====
-        // COALESCE garante que, se não houver resultados, retorna 0 em vez de NULL
-        const sqlTempo = "SELECT COALESCE(SUM(duracao),0) AS tempoTotal FROM Sessao WHERE userId = ?";
+  // ===== Tempo total de todas as sessões =====
+  // COALESCE garante que, se não houver resultados, retorna 0 em vez de NULL
+  const sqlTempo =
+    "SELECT COALESCE(SUM(duracao),0) AS tempoTotal FROM Sessao WHERE userId = ?";
 
-        // ===== Desporto favorito =====
-        // Seleciona o nome do desporto que aparece mais vezes nas sessões do utilizador
-        const sqlFav = `
+  // ===== Desporto favorito =====
+  // Seleciona o nome do desporto que aparece mais vezes nas sessões do utilizador
+  const sqlFav = `
             SELECT d.nome AS desportoFavorito
             FROM Sessao s
             INNER JOIN Desporto d ON s.desportoId = d.id
@@ -436,51 +439,59 @@ function addSessao(req, res) {
             LIMIT 1
         `;
 
-        // Executa a primeira query (total de sessões)
-        conn.query(sqlTotal, [userId], (err1, rows1) => {
-            if (err1)
-                return res.status(500).json({ ok: false, message: "Erro ao obter total de sessões." });
+  // Executa a primeira query (total de sessões)
+  conn.query(sqlTotal, [userId], (err1, rows1) => {
+    if (err1)
+      return res
+        .status(500)
+        .json({ ok: false, message: "Erro ao obter total de sessões." });
 
-            // Executa a segunda query (tempo total)
-            conn.query(sqlTempo, [userId], (err2, rows2) => {
-                if (err2)
-                    return res.status(500).json({ ok: false, message: "Erro ao obter tempo total." });
+    // Executa a segunda query (tempo total)
+    conn.query(sqlTempo, [userId], (err2, rows2) => {
+      if (err2)
+        return res
+          .status(500)
+          .json({ ok: false, message: "Erro ao obter tempo total." });
 
-                // Executa a terceira query (desporto favorito)
-                conn.query(sqlFav, [userId], (err3, rows3) => {
-                    if (err3)
-                        return res.status(500).json({ ok: false, message: "Erro ao obter desporto favorito." });
+      // Executa a terceira query (desporto favorito)
+      conn.query(sqlFav, [userId], (err3, rows3) => {
+        if (err3)
+          return res
+            .status(500)
+            .json({ ok: false, message: "Erro ao obter desporto favorito." });
 
-                    // Envia resposta JSON consolidando os três resultados
-                    res.json({
-                        ok: true,
-                        totalSessoes: rows1[0].totalSessoes,           // Número total de sessões
-                        tempoTotal: rows2[0].tempoTotal,               // Soma das durações
-                        desportoFavorito: rows3[0]?.desportoFavorito || "Nenhum" // Nome do desporto mais praticado
-                    });
-                });
-            });
+        // Envia resposta JSON consolidando os três resultados
+        res.json({
+          ok: true,
+          totalSessoes: rows1[0].totalSessoes, // Número total de sessões
+          tempoTotal: rows2[0].tempoTotal, // Soma das durações
+          desportoFavorito: rows3[0]?.desportoFavorito || "Nenhum", // Nome do desporto mais praticado
         });
-    }
+      });
+    });
+  });
+}
 
-  // ===================================
-  // GET ESTATÍSTICAS POR DESPORTO (UTILIZADOR ATUAL)
-  // ===================================
-  function getEstatisticasPorDesporto(req, res) {
-    // Obtém o ID do utilizador autenticado através da sessão (passport)
-    const userId = req.user?.id;
+// ===================================
+// GET ESTATÍSTICAS POR DESPORTO (UTILIZADOR ATUAL)
+// ===================================
+function getEstatisticasPorDesporto(req, res) {
+  // Obtém o ID do utilizador autenticado através da sessão (passport)
+  const userId = req.user?.id;
 
-    // Se o utilizador não estiver autenticado, devolve erro 401 (não autorizado)
-    if (!userId)
-      return res.status(401).json({ ok: false, message: "Utilizador não autenticado." });
+  // Se o utilizador não estiver autenticado, devolve erro 401 (não autorizado)
+  if (!userId)
+    return res
+      .status(401)
+      .json({ ok: false, message: "Utilizador não autenticado." });
 
-    // Query SQL:
-    // - Junta as tabelas Sessao e Desporto
-    // - Conta o número total de sessões por desporto (COUNT)
-    // - Soma a duração total de todas as sessões desse desporto (SUM)
-    // - Agrupa por ID e nome do desporto
-    // - Ordena do desporto com mais sessões para o com menos
-    const sql = `
+  // Query SQL:
+  // - Junta as tabelas Sessao e Desporto
+  // - Conta o número total de sessões por desporto (COUNT)
+  // - Soma a duração total de todas as sessões desse desporto (SUM)
+  // - Agrupa por ID e nome do desporto
+  // - Ordena do desporto com mais sessões para o com menos
+  const sql = `
       SELECT 
         d.nome AS desporto,
         COUNT(s.id) AS totalSessoes,
@@ -492,21 +503,98 @@ function addSessao(req, res) {
       ORDER BY totalSessoes DESC
     `;
 
-    // Executa a query, substituindo o "?" pelo ID do utilizador atual
-    conn.query(sql, [userId], (err, rows) => {
-      // Se ocorrer erro na base de dados, devolve resposta 500
-      if (err)
-        return res.status(500).json({ ok: false, message: "Erro ao obter estatísticas por desporto." });
+  // Executa a query, substituindo o "?" pelo ID do utilizador atual
+  conn.query(sql, [userId], (err, rows) => {
+    // Se ocorrer erro na base de dados, devolve resposta 500
+    if (err)
+      return res
+        .status(500)
+        .json({
+          ok: false,
+          message: "Erro ao obter estatísticas por desporto.",
+        });
 
-      // Caso tudo corra bem, devolve o resultado em formato JSON
-      res.json({
-        ok: true,
-        message: "Estatísticas por desporto obtidas com sucesso.",
-        data: rows // Contém um array de objetos: { desporto, totalSessoes, tempoTotal }
-      });
+    // Caso tudo corra bem, devolve o resultado em formato JSON
+    res.json({
+      ok: true,
+      message: "Estatísticas por desporto obtidas com sucesso.",
+      data: rows, // Contém um array de objetos: { desporto, totalSessoes, tempoTotal }
     });
+  });
+}
+
+// ======================================
+// GET PERFIL (UTILIZADOR ATUAL)
+// ======================================
+function getPerfil(req, res) {
+  // Passport guarda o utilizador autenticado em req.user
+  const userId = req.user?.id;
+
+  // Se não houver user na sessão → não autorizado
+  if (!userId)
+    return res
+      .status(401)
+      .json({ ok: false, message: "Utilizador não autenticado." });
+
+  // Query SQL → obter apenas os dados que vão ser mostrados no perfil
+  const sql = `SELECT id, nome, email FROM User WHERE id = ?`;
+
+  // Executa a query enviando como parâmetro o userId
+  conn.query(sql, [userId], (err, rows) => {
+    // Se houver erro na BD
+    if (err)
+      return res
+        .status(500)
+        .json({ ok: false, message: "Erro ao obter perfil." });
+
+    // rows[0] contém o registo do utilizador
+    res.json({
+      ok: true,
+      message: "Perfil obtido com sucesso.",
+      data: rows[0],
+    });
+  });
+}
+
+// ======================================
+// UPDATE PERFIL (UTILIZADOR ATUAL)
+// ======================================
+function updatePerfil(req, res) {
+
+  // Obtém o id do utilizador autenticado
+  const userId = req.user?.id;
+
+  // Extrai os dados enviados no body do pedido
+  const { nome, email, password } = req.body;
+
+  // Validação: nome e email são obrigatórios
+  if (!nome || !email)
+    return res.status(400).json({ ok: false, message: "Nome e email são obrigatórios." });
+
+  // Query base (sem alterar password)
+  let sql = `UPDATE User SET nome = ?, email = ? WHERE id = ?`;
+  let params = [nome, email, userId];
+
+  // Se o utilizador enviar uma nova password, então atualizamos também
+  if (password && password.trim() !== "") {
+    // Cifra a nova password com bcrypt (10 rounds)
+    const hash = bcrypt.hashSync(password, 10);
+
+    sql = `UPDATE User SET nome = ?, email = ?, password = ? WHERE id = ?`;
+    params = [nome, email, hash, userId];
   }
 
+  // Execução da query
+  conn.query(sql, params, (err) => {
+
+    // Se houver erro na BD
+    if (err)
+      return res.status(500).json({ ok: false, message: "Erro ao atualizar perfil." });
+
+    // Tudo OK → retorna sucesso
+    res.json({ ok: true, message: "Perfil atualizado com sucesso." });
+  });
+}
 
 // ==========================
 // EXPORTAR FUNÇÕES
@@ -522,5 +610,7 @@ module.exports = {
   updateSessao,
   deleteSessao,
   getEstatisticas,
-  getEstatisticasPorDesporto
+  getEstatisticasPorDesporto,
+  getPerfil,
+  updatePerfil
 };

@@ -69,6 +69,9 @@ app.delete("/api/sessoes/:id", ensureAuthenticated, requestHandlers.deleteSessao
 app.get("/api/estatisticas", ensureAuthenticated, requestHandlers.getEstatisticas);
 app.get("/api/estatisticasPorDesporto", ensureAuthenticated, requestHandlers.getEstatisticasPorDesporto);
 
+// --- PERFIL ---
+app.get("/api/user/profile", ensureAuthenticated, requestHandlers.getPerfil);
+app.put("/api/user/profile", ensureAuthenticated, requestHandlers.updatePerfil);
 
 // --- Páginas EJS protegidas ---
 app.get("/dashboard", ensureAuthenticated, (req, res) => {
@@ -83,6 +86,10 @@ app.get("/ranking", ensureAuthenticated, (req, res) => {
 
 app.get("/estatisticas", ensureAuthenticated, (req, res) => {
   res.render("estatisticas", { nome: req.user.nome, userId: req.user.id });
+});
+
+app.get("/perfil", ensureAuthenticated, (req, res) => {
+  res.render("perfil", { nome: req.user.nome, userId: req.user.id });
 });
 
 // Erros
