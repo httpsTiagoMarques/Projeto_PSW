@@ -4,6 +4,17 @@
 // ==============================================
 
 window.addEventListener("DOMContentLoaded", function () {
+  // ==========================
+  // Bloquear datas futuras
+  // ==========================
+  function bloquearDatas() {
+    const hoje = new Date().toISOString().split("T")[0]; // formato YYYY-MM-DD
+
+    document.getElementById("data").setAttribute("max", hoje);
+    document.getElementById("edit-data").setAttribute("max", hoje);
+  }
+
+  bloquearDatas();
   var tableBody = document.getElementById("sessoes-body");
   var addButton = document.getElementById("add-sessao-btn");
   var formBox = document.getElementById("form-box");
@@ -53,7 +64,9 @@ window.addEventListener("DOMContentLoaded", function () {
                         data-desporto="${item.desporto}"
                         data-duracao="${item.duracao}"
                         data-localizacao="${item.localizacao}"
-                        data-data="${item.data}"
+                        data-data="${
+                          new Date(item.data).toISOString().split("T")[0]
+                        }"
                         data-hora="${item.hora.substring(0, 5)}">Editar</button>
                 <button class="delete-btn" data-id="${
                   item.sessaoId
@@ -66,7 +79,6 @@ window.addEventListener("DOMContentLoaded", function () {
           // Botão editar
           document.querySelectorAll(".edit-btn").forEach(function (btn) {
             btn.addEventListener("click", function () {
-
               // Preenche campos do formulário de edição
               editId.value = this.dataset.id;
               editDuracao.value = this.dataset.duracao;
@@ -133,22 +145,24 @@ window.addEventListener("DOMContentLoaded", function () {
   // Carregar desporto
   // ==========================
   function carregarDesportosEditar(selecionado) {
-  return fetch("/api/getDesportos")
-    .then((res) => res.json())
-    .then((data) => {
-      editDesporto.innerHTML = "";
-      if (data.ok && data.data.length > 0) {
-        data.data.forEach(function (item) {
-          var opt = document.createElement("option");
-          opt.value = item.desportoId;
-          opt.textContent = item.nome;
-          if (item.nome === selecionado) opt.selected = true;
-          editDesporto.appendChild(opt);
-        });
-      }
-    })
-    .catch((err) => console.error("Erro ao carregar desportos para edição:", err));
-}
+    return fetch("/api/getDesportos")
+      .then((res) => res.json())
+      .then((data) => {
+        editDesporto.innerHTML = "";
+        if (data.ok && data.data.length > 0) {
+          data.data.forEach(function (item) {
+            var opt = document.createElement("option");
+            opt.value = item.desportoId;
+            opt.textContent = item.nome;
+            if (item.nome === selecionado) opt.selected = true;
+            editDesporto.appendChild(opt);
+          });
+        }
+      })
+      .catch((err) =>
+        console.error("Erro ao carregar desportos para edição:", err)
+      );
+  }
 
   // ==========================
   // Mostrar formulário criar
