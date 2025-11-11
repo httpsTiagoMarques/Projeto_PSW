@@ -19,10 +19,10 @@ window.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      // ===== 1. Número total de sessões =====
+      // ===== Número total de sessões =====
       document.getElementById("total-sessoes").textContent = data.totalSessoes || 0;
 
-      // ===== 2. Tempo total formatado =====
+      // ===== Tempo total formatado =====
       const tempoMin = data.tempoTotal || 0; // Tempo total em minutos
       let tempoFormatado = "";
 
@@ -52,16 +52,18 @@ window.addEventListener("DOMContentLoaded", function () {
   // ==============================
   // Estatísticas por desporto
   // ==============================
+  // Faz um pedido à API para obter o total de sessões e tempo total agrupado por tipo de desporto.
   fetch("/api/estatisticasPorDesporto")
     .then(res => res.json()) // Converte resposta em JSON
     .then(data => {
-      if (!data.ok) {
+      if (!data.ok) { // Verifica se a resposta é válida e contém dados
         console.error("Erro ao carregar estatísticas por desporto.");
         return;
       }
 
+      // Seleciona o corpo da tabela onde os dados serão inseridos
       const tbody = document.getElementById("estatisticas-body");
-      tbody.innerHTML = "";
+      tbody.innerHTML = ""; // Limpa qualquer conteúdo anterior
 
       // Se não houver dados, mostra mensagem
       if (data.data.length === 0) {
@@ -72,19 +74,25 @@ window.addEventListener("DOMContentLoaded", function () {
       // Preenche tabela com estatísticas por desporto
       data.data.forEach(item => {
         // Formata tempo (ex: 1h 30m ou 45 min)
+        // Se o tempo for >= 60 minutos, converte em formato "Xh Ym"
         const tempo = item.tempoTotal >= 60
-          ? `${Math.floor(item.tempoTotal / 60)}h ${item.tempoTotal % 60}m`
-          : `${item.tempoTotal} min`;
+          ? `${Math.floor(item.tempoTotal / 60)}h ${item.tempoTotal % 60}m` // usa Math.floor() para obter as horas inteiras e o operador % para calcular os minutos restantes.
+          : `${item.tempoTotal} min`;  // Caso contrário, mostra apenas em minutos
 
+        // Cria uma nova linha (<tr>) para cada desporto
         const row = document.createElement("tr");
+
+        // Insere o conteúdo formatado nas colunas correspondentes
         row.innerHTML = `
           <td>${item.desporto}</td>
           <td>${item.totalSessoes}</td>
           <td>${tempo}</td>
         `;
+        // Adiciona a linha à tabela
         tbody.appendChild(row);
       });
     })
+    // Captura erros durante o pedido (problemas de rede ou resposta inválida)
     .catch(err => {
       console.error("Erro ao carregar estatísticas por desporto:", err);
     });
