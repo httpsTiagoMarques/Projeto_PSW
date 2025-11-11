@@ -1,3 +1,9 @@
+// ======================================================
+//  SCRIPT: Perfil do Utilizador
+//  Descrição: controla o carregamento e atualização dos
+//             dados do utilizador autenticado.
+// ======================================================
+
 window.addEventListener("DOMContentLoaded", function () {
   // Elementos HTML do formulário
   const form = document.getElementById("perfil-form");
@@ -6,38 +12,40 @@ window.addEventListener("DOMContentLoaded", function () {
   const passwordInput = document.getElementById("password");
 
   // ==========================
-  // Função: carregar os dados do utilizador
+  // Carregar dados do perfil
   // ==========================
+  // Obtém os dados do utilizador autenticado e preenche o formulário
   function carregarPerfil() {
     fetch("/api/user/profile")
       .then((res) => res.json())
       .then((data) => {
-        // Se a resposta não tiver sucesso -> avisa o utilizador
+        // Se a API responder com erro → mostra aviso
         if (!data.ok) {
-          alert("Erro a carregar perfil.");
+          alert("Erro ao carregar o perfil.");
           return;
         }
 
-        // Preenche automaticamente os inputs com os dados do user
+        // Preenche os campos do formulário com os dados recebidos
         nomeInput.value = data.data.nome;
         emailInput.value = data.data.email;
-        passwordInput.value = ""; // nunca preenchemos password por segurança
+
+        // Nunca preenche password por segurança
+        passwordInput.value = "";
       })
-      .catch((err) => {
-        console.error("Erro ao carregar perfil:", err);
-      });
+      .catch((err) => console.error("Erro ao carregar perfil:", err));
   }
 
-  // ==========================
-  // Função: atualizar dados do perfil (PUT)
-  // ==========================
+  // ============================================
+  // Atualizar dados do perfil (PUT)
+  // ============================================
+  // Envia os dados alterados para o servidor
   function atualizarPerfil(e) {
-    e.preventDefault(); // impede refresh da página
+    e.preventDefault(); // Impede refresh de página
 
     const dados = {
       nome: nomeInput.value.trim(),
       email: emailInput.value.trim(),
-      password: passwordInput.value.trim() // pode ser vazio
+      password: passwordInput.value.trim(), // pode vir vazio
     };
 
     fetch("/api/user/profile", {
@@ -45,22 +53,23 @@ window.addEventListener("DOMContentLoaded", function () {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados),
     })
-      .then(res => res.json())
-      .then(response => {
+      .then((res) => res.json())
+      .then((response) => {
+        // Mostra a mensagem devolvida pela API
         alert(response.message);
 
-        // Depois de gravar, recarrega os dados
+        // Recarrega os dados no formulário
         carregarPerfil();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Erro ao atualizar perfil:", err);
         alert("Erro ao atualizar perfil.");
       });
   }
 
-  // Vincula evento ao formulário
+  // Evento para submeter o formulário
   form.addEventListener("submit", atualizarPerfil);
 
-  // Inicializa carregamento quando a página abre
+  // Quando a página carregar → obtém os dados do utilizador
   carregarPerfil();
 });

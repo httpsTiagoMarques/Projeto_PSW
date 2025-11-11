@@ -1,26 +1,30 @@
 // ==============================================
 //  SCRIPT: Gestão de Sessões
-//  Descrição: controla o carregamento, criação, edição e remoção de sessões.
+//  Descrição: controla o carregamento, criação,
+//             edição e remoção de sessões.
 // ==============================================
 
 window.addEventListener("DOMContentLoaded", function () {
   // ==========================
   // Bloquear datas futuras
   // ==========================
+  // Define a data máxima nos inputs como a data de hoje,
+  // impedindo inserir sessões futuras
   function bloquearDatas() {
-    const hoje = new Date().toISOString().split("T")[0]; // formato YYYY-MM-DD
-
+    const hoje = new Date().toISOString().split("T")[0];
     document.getElementById("data").setAttribute("max", hoje);
     document.getElementById("edit-data").setAttribute("max", hoje);
   }
-
   bloquearDatas();
+
+  // Referências aos elementos HTML
   var tableBody = document.getElementById("sessoes-body");
   var addButton = document.getElementById("add-sessao-btn");
   var formBox = document.getElementById("form-box");
   var editBox = document.getElementById("edit-box");
   var createForm = document.getElementById("create-form");
   var editForm = document.getElementById("edit-form");
+
   var cancelBtn = document.getElementById("cancel-btn");
   var cancelEditBtn = document.getElementById("cancel-edit-btn");
 
@@ -42,13 +46,15 @@ window.addEventListener("DOMContentLoaded", function () {
   // ==========================
   // Carregar lista de sessões
   // ==========================
+  // Preenche a tabela com as sessões do utilizador autenticado
   function carregarSessoes() {
     fetch("/api/sessoes")
       .then((res) => res.json())
       .then((data) => {
-        tableBody.innerHTML = "";
+        tableBody.innerHTML = ""; // limpa tabela
 
         if (data.ok && data.data.length > 0) {
+          // Cria uma linha da tabela por cada sessão
           data.data.forEach(function (item) {
             var row = document.createElement("tr");
             row.innerHTML = `
@@ -76,7 +82,7 @@ window.addEventListener("DOMContentLoaded", function () {
             tableBody.appendChild(row);
           });
 
-          // Botão editar
+          // Evento Editar
           document.querySelectorAll(".edit-btn").forEach(function (btn) {
             btn.addEventListener("click", function () {
               // Preenche campos do formulário de edição
@@ -86,7 +92,7 @@ window.addEventListener("DOMContentLoaded", function () {
               editData.value = this.dataset.data;
               editHora.value = this.dataset.hora;
 
-              // Carrega a lista de desportos e só depois mostra o formulário
+              // Carrega desportos e seleciona o correto
               carregarDesportosEditar(this.dataset.desporto).then(() => {
                 formBox.style.display = "none";
                 editBox.style.display = "block";
@@ -94,98 +100,81 @@ window.addEventListener("DOMContentLoaded", function () {
             });
           });
 
-          // Botão remover
+          // Evento Remover
           document.querySelectorAll(".delete-btn").forEach(function (btn) {
             btn.addEventListener("click", function () {
-              var id = this.dataset.id;
-              if (confirm("Tens a certeza que queres remover esta sessão?")) {
-                fetch("/api/sessoes/" + id, { method: "DELETE" })
-                  .then((res) => res.json())
-                  .then((response) => {
-                    if (response.ok) carregarSessoes();
-                    else alert("Erro: " + response.message);
-                  })
-                  .catch((err) => {
-                    console.error("Erro ao remover sessão:", err);
-                    alert("Erro de comunicação com o servidor.");
-                  });
-              }
+              if (!confirm("Tens a certeza que queres remover esta sessão?"))
+                return;
+
+              fetch("/api/sessoes/" + this.dataset.id, { method: "DELETE" })
+                .then((res) => res.json())
+                .then((response) => {
+                  if (response.ok) carregarSessoes();
+                  else alert("Erro: " + response.message);
+                });
             });
           });
         } else {
           tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Sem sessões registadas</td></tr>`;
         }
-      })
-      .catch((err) => {
-        console.error("Erro ao carregar sessões:", err);
-        tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Erro ao obter dados</td></tr>`;
       });
   }
 
   // ==========================
-  // Carregar desportos
+  // Carregar desportos (para criar)
   // ==========================
   function carregarDesportos() {
     fetch("/api/getDesportos")
       .then((res) => res.json())
       .then((data) => {
         desportoSelect.innerHTML = "";
-        if (data.ok && data.data.length > 0) {
-          data.data.forEach(function (item) {
-            var opt = document.createElement("option");
-            opt.value = item.desportoId;
-            opt.textContent = item.nome;
-            desportoSelect.appendChild(opt);
-          });
-        }
+        data.data.forEach(function (item) {
+          var opt = document.createElement("option");
+          opt.value = item.desportoId;
+          opt.textContent = item.nome;
+          desportoSelect.appendChild(opt);
+        });
       });
   }
 
   // ==========================
-  // Carregar desporto
+  // Carregar desportos (para editar)
   // ==========================
   function carregarDesportosEditar(selecionado) {
     return fetch("/api/getDesportos")
       .then((res) => res.json())
       .then((data) => {
         editDesporto.innerHTML = "";
-        if (data.ok && data.data.length > 0) {
-          data.data.forEach(function (item) {
-            var opt = document.createElement("option");
-            opt.value = item.desportoId;
-            opt.textContent = item.nome;
-            if (item.nome === selecionado) opt.selected = true;
-            editDesporto.appendChild(opt);
-          });
-        }
-      })
-      .catch((err) =>
-        console.error("Erro ao carregar desportos para edição:", err)
-      );
+        data.data.forEach((item) => {
+          var opt = document.createElement("option");
+          opt.value = item.desportoId;
+          opt.textContent = item.nome;
+          if (item.nome === selecionado) opt.selected = true;
+          editDesporto.appendChild(opt);
+        });
+      });
   }
 
-  // ==========================
-  // Mostrar formulário criar
-  // ==========================
+  // Mostrar Form Criar
   addButton.addEventListener("click", function () {
+    carregarDesportos();
     formBox.style.display = "block";
     editBox.style.display = "none";
-    carregarDesportos();
   });
 
+  // Ocultar Form Criar
   cancelBtn.addEventListener("click", function () {
-    formBox.style.display = "none";
     createForm.reset();
+    formBox.style.display = "none";
   });
 
+  // Ocultar Form Editar
   cancelEditBtn.addEventListener("click", function () {
-    editBox.style.display = "none";
     editForm.reset();
+    editBox.style.display = "none";
   });
 
-  // ==========================
-  // Submeter criação
-  // ==========================
+  // Criar sessão (POST)
   createForm.addEventListener("submit", function (e) {
     e.preventDefault();
 
@@ -207,22 +196,15 @@ window.addEventListener("DOMContentLoaded", function () {
         if (response.ok) {
           formBox.style.display = "none";
           createForm.reset();
-          carregarSessoes();
+          carregarSessoes(); // atualiza tabela
         } else alert("Erro: " + response.message);
-      })
-      .catch((err) => {
-        console.error("Erro ao adicionar sessão:", err);
-        alert("Erro de comunicação com o servidor.");
       });
   });
 
-  // ==========================
-  // Submeter edição
-  // ==========================
+  // Editar sessão (PUT)
   editForm.addEventListener("submit", function (e) {
     e.preventDefault();
 
-    var id = editId.value;
     var dados = {
       desportoId: editDesporto.value,
       duracao: editDuracao.value.trim(),
@@ -231,7 +213,7 @@ window.addEventListener("DOMContentLoaded", function () {
       hora: editHora.value,
     };
 
-    fetch("/api/sessoes/" + id, {
+    fetch("/api/sessoes/" + editId.value, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dados),
@@ -241,17 +223,11 @@ window.addEventListener("DOMContentLoaded", function () {
         if (response.ok) {
           editBox.style.display = "none";
           editForm.reset();
-          carregarSessoes();
+          carregarSessoes(); // atualiza tabela
         } else alert("Erro: " + response.message);
-      })
-      .catch((err) => {
-        console.error("Erro ao atualizar sessão:", err);
-        alert("Erro de comunicação com o servidor: " + err.message);
       });
   });
 
-  // ==========================
-  // Iniciar
-  // ==========================
+  // Ao carregar a página → carrega automaticamente
   carregarSessoes();
 });
